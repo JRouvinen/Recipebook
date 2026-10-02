@@ -1,0 +1,29 @@
+<p class="muted">{{ recipes|length }} recipe{{ '' if recipes|length == 1 else 's' }}</p>
+
+{% if recipes %}
+<div class="card-grid">
+  {% for recipe in recipes %}
+  <a class="card" href="/recipes/{{ recipe.id }}">
+    {% set image = recipe.image_attachments[0] if recipe.image_attachments else None %}
+    {% if image %}
+    <div class="card-thumb" style="background-image:url('/attachments/{{ image.id }}')"></div>
+    {% else %}
+    <div class="card-thumb card-thumb--empty">🍽️</div>
+    {% endif %}
+    <div class="card-body">
+      <h3>{{ recipe.name }}</h3>
+      {% if recipe.tags %}
+      <div class="tags">
+        {% for t in recipe.tags %}<span class="tag">{{ t.name }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      {% if recipe.description %}
+      <p class="muted">{{ recipe.description|truncate(120) }}</p>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty">No recipes found. <a href="/recipes/new">Add one</a>.</p>
+{% endif %}

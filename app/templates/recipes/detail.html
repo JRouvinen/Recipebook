@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.name }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>{{ recipe.name }}</h1>
+  <div class="actions">
+    <a class="btn" href="/recipes/{{ recipe.id }}/edit">Edit</a>
+    <form method="post" action="/recipes/{{ recipe.id }}/delete"
+          onsubmit="return confirm('Delete this recipe?')">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+{% if recipe.tags %}
+<div class="tags">
+  {% for t in recipe.tags %}<a class="tag" href="/?tag={{ t.name|urlencode }}">{{ t.name }}</a>{% endfor %}
+</div>
+{% endif %}
+
+{% if recipe.source_url %}
+<p><a href="{{ recipe.source_url }}" target="_blank" rel="noopener">Source ↗</a></p>
+{% endif %}
+
+{% if recipe.description %}
+<p>{{ recipe.description }}</p>
+{% endif %}
+
+{% if recipe.image_attachments %}
+<div class="gallery">
+  {% for image in recipe.image_attachments %}
+  <figure>
+    <a href="/attachments/{{ image.id }}" target="_blank">
+      <img src="/attachments/{{ image.id }}" alt="{{ image.original_name }}" loading="lazy">
+    </a>
+    <figcaption>{{ image.original_name }}</figcaption>
+  </figure>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="columns">
+  <section>
+    <h2>Ingredients</h2>
+    <pre class="text-block">{{ recipe.ingredients or '—' }}</pre>
+  </section>
+  <section>
+    <h2>Instructions</h2>
+    <pre class="text-block">{{ recipe.instructions or '—' }}</pre>
+  </section>
+</div>
+
+{% if recipe.text_attachments %}
+<h2>Notes &amp; text files</h2>
+{% for att in recipe.text_attachments %}
+<details class="attach">
+  <summary>{{ att.original_name }} · {{ att.size|human_size }}</summary>
+  {% if text_previews.get(att.id) is not none %}
+  <pre class="text-block">{{ text_previews[att.id] }}</pre>
+  {% else %}
+  <p class="muted">Preview unavailable (file too large). <a href="/attachments/{{ att.id }}/download">Download</a>.</p>
+  {% endif %}
+</details>
+{% endfor %}
+{% endif %}
+
+{% if recipe.other_attachments %}
+<h2>Files</h2>
+<ul class="attachment-list">
+  {% for att in recipe.other_attachments %}
+  <li>
+    <a href="/attachments/{{ att.id }}/download">{{ att.original_name }}</a>
+    <span class="muted">{{ att.size|human_size }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Add attachments</h2>
+<form class="inline" method="post" enctype="multipart/form-data" action="/recipes/{{ recipe.id }}/attachments">
+  <input type="file" name="files" multiple required>
+  <button class="btn" type="submit">Upload</button>
+</form>
+{% endblock %}

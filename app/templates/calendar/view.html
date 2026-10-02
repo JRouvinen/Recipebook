@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ plan.name }} · Calendar · {{ app_name }}{% endblock %}
+
+{% macro day_box(entry, day_date, today, next_url, extra='') %}
+<div class="day {% if day_date == today %}day--today{% endif %} {{ extra }}">
+  <div class="day-head">
+    <span class="day-name">{{ day_date.strftime('%a') }}</span>
+    <span class="day-num">{{ day_date.day }}</span>
+  </div>
+  {% if entry and entry.recipe %}
+    <a class="day-recipe" href="/recipes/{{ entry.recipe_id }}">{{ entry.recipe.name }}</a>
+    <div class="day-status status--{{ entry.status }}">{{ entry.status }}</div>
+    <div class="day-actions">
+      <form method="post" action="/calendar/entries/{{ entry.id }}/status">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button class="btn btn-tiny" name="status" value="cooked" type="submit" title="Mark cooked">✓</button>
+        <button class="btn btn-tiny" name="status" value="skipped" type="submit" title="Mark skipped">✕</button>
+        <button class="btn btn-tiny" name="status" value="planned" type="submit" title="Reset to planned">↺</button>
+      </form>
+      <form method="post" action="/calendar/entries/{{ entry.id }}/swap">
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button class="btn btn-tiny" type="submit" title="Swap for another recipe">⇄</button>
+      </form>
+    </div>
+  {% elif entry %}
+    <div class="day-empty">No recipe</div>
+  {% else %}
+    <div class="day-empty">—</div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% block content %}
+{% set next_url = '/calendar/' ~ plan.id ~ '?view=' ~ view ~ '&day=' ~ anchor.isoformat() %}
+
+<div class="page-head">
+  <h1>{{ plan.name }}</h1>
+  <div class="actions">
+    <a class="btn" href="/calendar">All plans</a>
+  </div>
+</div>
+<p class="muted">
+  {{ plan.mode|capitalize }} · {{ plan.interval|capitalize }} ·
+  {{ 'Active' if plan.active else 'Inactive' }} · {{ plan.items|length }} recipe(s)
+</p>
+
+<div class="cal-toolbar">
+  <div class="segmented">
+    <a class="{% if view == 'week' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=week&day={{ anchor.isoformat() }}">Week</a>
+    <a class="{% if view == 'month' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=month&day={{ anchor.isoformat() }}">Month</a>
+  </div>
+  <div class="cal-nav">
+    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ prev_anchor.isoformat() }}">← Prev</a>
+    <span class="muted">{{ start.isoformat() }} – {{ end.isoformat() }}</span>
+    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ next_anchor.isoformat() }}">Next →</a>
+  </div>
+</div>
+
+{% if view == 'week' %}
+<div class="cal-grid">
+  {% for day in days %}{{ day_box(day.entry, day.date, today, next_url) }}{% endfor %}
+</div>
+{% else %}
+<div class="cal-grid">
+  {% for name in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+  <div class="weekday">{{ name }}</div>
+  {% endfor %}
+  {% for week in weeks %}
+    {% for day in week %}
+      {{ day_box(day.entry, day.date, today, next_url, '' if day.in_period else 'out') }}
+    {% endfor %}
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

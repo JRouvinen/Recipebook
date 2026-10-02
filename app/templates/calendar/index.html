@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Calendar · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Recipe calendar</h1>
+  <a class="btn btn-primary" href="/calendar/new">+ New plan</a>
+</div>
+
+{% if plans %}
+<div class="card-grid">
+  {% for plan in plans %}
+  <div class="card card--static">
+    <div class="card-body">
+      <h3><a href="/calendar/{{ plan.id }}">{{ plan.name }}</a></h3>
+      <p class="muted">
+        {{ plan.mode|capitalize }} · {{ plan.interval|capitalize }} ·
+        {{ 'Active' if plan.active else 'Inactive' }} · {{ plan.items|length }} recipe(s)
+      </p>
+      <div class="actions">
+        <a class="btn btn-small" href="/calendar/{{ plan.id }}">Open</a>
+        <form method="post" action="/calendar/{{ plan.id }}/toggle">
+          <button class="btn btn-small" type="submit">{{ 'Deactivate' if plan.active else 'Activate' }}</button>
+        </form>
+        <form method="post" action="/calendar/{{ plan.id }}/delete"
+              onsubmit="return confirm('Delete plan {{ plan.name }}?')">
+          <button class="btn btn-small btn-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty">No plans yet. <a href="/calendar/new">Create your first rotation</a>.</p>
+{% endif %}
+{% endblock %}

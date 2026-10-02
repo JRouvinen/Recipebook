@@ -1,0 +1,16 @@
+services:
+  recipebook:
+    build: .
+    image: recipebook:latest
+    container_name: recipebook
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      RECIPEBOOK_DATA_DIR: /data
+      RECIPEBOOK_SECRET_KEY: "${RECIPEBOOK_SECRET_KEY:-change-me-in-production}"
+    volumes:
+      - recipebook-data:/data
+
+volumes:
+  recipebook-data:

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}New plan · {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>New rotation plan</h1>
+
+<form method="post" action="/calendar" class="stack">
+  <label>Plan name
+    <input type="text" name="name" required placeholder="Weekly dinners" autofocus>
+  </label>
+
+  <div class="field-row">
+    <label>Mode
+      <select name="mode">
+        <option value="fixed">Fixed order</option>
+        <option value="random">Random</option>
+      </select>
+    </label>
+    <label>Rotation
+      <select name="interval">
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </label>
+    <label>Start date
+      <input type="date" name="start_date" value="{{ today.isoformat() }}">
+    </label>
+  </div>
+
+  <fieldset>
+    <legend>Recipes <span class="muted">(fixed mode uses this order top-to-bottom)</span></legend>
+    {% if recipes %}
+    <div class="checklist">
+      {% for recipe in recipes %}
+      <label class="check">
+        <input type="checkbox" name="recipes" value="{{ recipe.id }}" checked>
+        {{ recipe.name }}
+      </label>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">No recipes yet. <a href="/recipes/new">Add some first</a>.</p>
+    {% endif %}
+  </fieldset>
+
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Create plan</button>
+    <a class="btn" href="/calendar">Cancel</a>
+  </div>
+</form>
+{% endblock %}

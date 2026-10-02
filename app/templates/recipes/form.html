@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit recipe' if recipe else 'New recipe' }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ 'Edit recipe' if recipe else 'New recipe' }}</h1>
+
+<form method="post" enctype="multipart/form-data" class="stack"
+      action="{{ '/recipes/' ~ recipe.id if recipe else '/recipes' }}">
+  <label>Name
+    <input type="text" name="name" value="{{ recipe.name if recipe else '' }}" required autofocus>
+  </label>
+
+  <label>Source link
+    <input type="url" name="source_url" value="{{ recipe.source_url if recipe else '' }}" placeholder="https://…">
+  </label>
+
+  <label>Short description
+    <textarea name="description" rows="2">{{ recipe.description if recipe else '' }}</textarea>
+  </label>
+
+  <label>Ingredients
+    <textarea name="ingredients" rows="6" placeholder="One per line">{{ recipe.ingredients if recipe else '' }}</textarea>
+  </label>
+
+  <label>Instructions
+    <textarea name="instructions" rows="8">{{ recipe.instructions if recipe else '' }}</textarea>
+  </label>
+
+  <label>Tags
+    <input type="text" name="tags" value="{{ form_tags }}" placeholder="Vegetarian, Chicken, Quick">
+    <span class="muted">Separate with commas. New tags are created automatically.</span>
+  </label>
+
+  <label>Add attachments
+    <input type="file" name="files" multiple>
+    <span class="muted">Images, text files, PDFs — multiple allowed.</span>
+  </label>
+
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Save recipe</button>
+    <a class="btn" href="{{ '/recipes/' ~ recipe.id if recipe else '/' }}">Cancel</a>
+  </div>
+</form>
+
+{% if recipe and recipe.attachments %}
+<h2>Attached files</h2>
+<ul class="attachment-list">
+  {% for att in recipe.attachments %}
+  <li>
+    <a href="/attachments/{{ att.id }}{% if att.kind != 'image' %}/download{% endif %}" target="_blank">{{ att.original_name }}</a>
+    <span>
+      <span class="muted">{{ att.size|human_size }}</span>
+      <form class="inline" method="post" action="/attachments/{{ att.id }}/delete"
+            onsubmit="return confirm('Remove {{ att.original_name }}?')">
+        <button class="btn btn-small btn-danger" type="submit">Remove</button>
+      </form>
+    </span>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

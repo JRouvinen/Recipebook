@@ -1,0 +1,39 @@
+# Change log
+
+All notable changes to Recipebook are documented in this file.
+The format is loosely based on [Keep a Changelog](https://keepachangelog.com/),
+and this project adheres to semantic versioning.
+
+## [Unreleased]
+
+## [1.0.0] — 2026-10-02
+
+Initial release: a self-hosted, Docker-deployable recipe book.
+
+### Added
+- **Project scaffolding:** application factory, environment-based settings, SQLite
+  engine/session with foreign-key and WAL pragmas, git repository, `.gitignore`,
+  `.dockerignore`, `requirements.txt` / `requirements-dev.txt`.
+- **Recipes:** create, view, edit and delete recipes with name, description, source
+  link, ingredients and instructions.
+- **Attachments:** upload multiple files per recipe (images, text files and other
+  documents), stored on disk with metadata in the database; inline image gallery, text
+  previews, downloads and deletion.
+- **Tags:** many-to-many tags created inline from the recipe form, a tag management page
+  (rename/delete) and multi-tag filtering.
+- **Search & filtering:** free-text search across name, description, ingredients and
+  instructions, combined with tag filters and name/newest/oldest sorting, delivered with
+  HTMX for live updates.
+- **Rotation calendar:** fixed-ordered or random plans, weekly or monthly cycles, one
+  recipe per day with wrap/repeat, week and month views, marking entries as
+  cooked/skipped/planned and swapping in a different recipe. Activate/deactivate plans.
+- **Export / import:** download the entire database as a `.sqlite` file and restore it by
+  upload, with validation and automatic backup of the previous database.
+- **UI:** responsive server-rendered Jinja2 templates, hand-written CSS and a vendored copy
+  of HTMX (works fully offline), plus friendly 404 page.
+- **Auth hook:** `app/auth.py` resolves a single local user for now, so real
+  authentication can be added later in one place.
+- **Quality:** pytest suite covering recipe CRUD/search, attachments, tags, calendar
+  scheduling and database export/import; a `seed.py` sample-data script.
+- **Deployment:** `Dockerfile`, `docker-compose.yml` with a persistent `recipebook-data`
+  volume, healthcheck and `README.md`.
