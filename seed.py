@@ -65,17 +65,26 @@ def main() -> None:
             print(f"Database already contains {existing} recipe(s); nothing to do.")
             return
 
+        tag_cache: dict[str, Tag] = {}
+
+        def get_tag(name: str) -> Tag:
+            key = name.lower()
+            if key not in tag_cache:
+                tag = session.scalar(select(Tag).where(func.lower(Tag.name) == key))
+                if tag is None:
+                    tag = Tag(name=name)
+                    session.add(tag)
+                    session.flush()
+                tag_cache[key] = tag
+            return tag_cache[key]
+
         for sample in SAMPLE_RECIPES:
             data = dict(sample)
             tag_names = [t.strip() for t in data.pop("tags", "").split(",") if t.strip()]
             recipe = Recipe(**data)
-            for name in tag_names:
-                tag = session.scalar(select(Tag).where(func.lower(Tag.name) == name.lower()))
-                if tag is None:
-                    tag = Tag(name=name)
-                    session.add(tag)
-                recipe.tags.append(tag)
             session.add(recipe)
+            for name in tag_names:
+                recipe.tags.append(get_tag(name))
 
         session.commit()
         print(f"Seeded {len(SAMPLE_RECIPES)} recipes into {settings.database_url}.")
