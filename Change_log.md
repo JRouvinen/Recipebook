@@ -6,6 +6,8 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-10-03
+
 ### Added
 - **Import recipe from a URL:** paste a recipe link and Recipebook reads the page's
   schema.org JSON-LD (name, ingredients, instructions, tags, image) and creates the recipe.
