@@ -155,3 +155,37 @@ def test_spacing_every_other_day(client, app, make_recipe):
         "2026-01-11",
     ]
     assert [entry.recipe_id for entry in entries] == [alpha, beta, alpha, beta]
+
+
+def test_spacing_skips_days_before_start(client, app, make_recipe):
+    alpha = make_recipe("Alpha")
+    beta = make_recipe("Beta")
+    # Start mid-week (Wed 2026-01-07); Mon/Tue must stay empty.
+    plan_id = _plan(
+        client,
+        name="Mid-week start",
+        mode="fixed",
+        interval="weekly",
+        start_date="2026-01-07",
+        spacing=2,
+        recipes=[alpha, beta],
+    )
+    assert client.get(f"/calendar/{plan_id}?view=week&day=2026-01-07").status_code == 200
+
+    with app.state.db.session() as session:
+        entries = (
+            session.execute(
+                select(CalendarEntry)
+                .where(CalendarEntry.plan_id == plan_id)
+                .order_by(CalendarEntry.entry_date)
+            )
+            .scalars()
+            .all()
+        )
+
+    assert [entry.entry_date.isoformat() for entry in entries] == [
+        "2026-01-07",
+        "2026-01-09",
+        "2026-01-11",
+    ]
+    assert [entry.recipe_id for entry in entries] == [alpha, beta, alpha]

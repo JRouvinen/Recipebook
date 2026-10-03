@@ -21,6 +21,10 @@ and this project adheres to semantic versioning.
 ### Fixed
 - Flash messages queued while another flash was already pending were silently dropped
   (Starlette's session only persists explicit assignments).
+- Calendar plans showed a recipe on days *before* the plan's start date (they were clamped
+  to day 0), which made an "every other day" plan look like it ran every day when the start
+  date fell mid-week. Pre-start days are now left empty, and any stale entries are cleaned
+  up automatically on the next calendar view.
 
 ## [1.0.0] — 2026-10-02
 

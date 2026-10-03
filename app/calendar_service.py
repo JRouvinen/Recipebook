@@ -19,7 +19,7 @@ import math
 import random
 from datetime import date, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from .models import CalendarEntry, Recipe, RotationItem, RotationPlan
@@ -83,6 +83,20 @@ def generate_entries(
     if end < start:
         start, end = end, start
     rng = rng or random.Random()
+    plan_start = plan.start_date or date.today()
+
+    # Entries before the plan start are out of scope - drop any left over by older versions.
+    deleted = (
+        session.execute(
+            delete(CalendarEntry)
+            .where(
+                CalendarEntry.plan_id == plan.id,
+                CalendarEntry.entry_date < plan_start,
+            )
+            .execution_options(synchronize_session=False)
+        ).rowcount
+        or 0
+    )
 
     existing = {
         entry.entry_date: entry
@@ -117,7 +131,12 @@ def generate_entries(
             day += timedelta(days=1)
             continue
 
-        offset = max((day - plan.start_date).days, 0)
+        # The plan only covers days from its start date onwards; earlier days stay empty.
+        if day < plan_start:
+            day += timedelta(days=1)
+            continue
+
+        offset = (day - plan_start).days
         if spacing > 1 and offset % spacing != 0:
             day += timedelta(days=1)
             continue
@@ -138,7 +157,7 @@ def generate_entries(
         last_recipe_id = recipe_id
         day += timedelta(days=1)
 
-    if created:
+    if created or deleted:
         session.commit()
     return created
 
