@@ -6,6 +6,8 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-10-03
+
 ### Added
 - **Light/dark theme:** a toggle in the nav switches between light and dark palettes, remembered
   per browser. The initial theme follows the OS `prefers-color-scheme` until the user chooses.
