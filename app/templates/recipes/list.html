@@ -7,6 +7,8 @@
   <a class="btn btn-primary" href="/recipes/new">+ New recipe</a>
 </div>
 
+{% include "recipes/_import_url.html" %}
+
 <form class="filters"
       hx-get="/"
       hx-target="#recipe-results"

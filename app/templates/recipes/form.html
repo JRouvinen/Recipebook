@@ -4,6 +4,10 @@
 {% block content %}
 <h1>{{ 'Edit recipe' if recipe else 'New recipe' }}</h1>
 
+{% if not recipe %}
+{% include "recipes/_import_url.html" %}
+{% endif %}
+
 <form method="post" enctype="multipart/form-data" class="stack"
       action="{{ '/recipes/' ~ recipe.id if recipe else '/recipes' }}">
   <label>Name

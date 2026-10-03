@@ -15,6 +15,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
 - **Rotation calendar** — fixed or random, weekly or monthly; one recipe every day, every other day or weekly; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
 - **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
+- **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — download the whole database as a single `.sqlite` file and restore it later.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
 - **No auth in v1**, but every request flows through an auth hook so it can be added later.

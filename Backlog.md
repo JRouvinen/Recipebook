@@ -89,7 +89,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Portable archive export (DB + media as a zip) and JSON export
 - [ ] Shopping list generated from planned recipes
 - [ ] Structured ingredients + unit parsing
-- [ ] Import recipe from a URL (schema.org / JSON-LD)
+- [x] Import recipe from a URL (schema.org / JSON-LD)
 - [ ] Image thumbnails + optimisation
 - [ ] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
 - [ ] Drag-and-drop ordering of recipes in a fixed plan

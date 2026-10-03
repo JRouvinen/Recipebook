@@ -12,6 +12,7 @@ from ..config import Settings
 from ..deps import DbSession, SettingsDep
 from ..link_preview import fetch_recipe_image
 from ..models import Recipe, Tag
+from ..recipe_import import extract_recipe, fetch_html
 from ..storage import delete_upload, read_text, save_bytes, save_upload
 from ..templating import flash, render
 from ..utils import parse_tag_names
@@ -141,6 +142,52 @@ def create_recipe(
     flash(request, f'Recipe "{recipe.name}" created.')
     if import_image and not imported:
         flash(request, "Could not import an image from the source link.", "error")
+    return RedirectResponse(f"/recipes/{recipe.id}?created=1", status_code=303)
+
+
+@router.post("/recipes/import")
+def import_recipe_from_url(
+    request: Request,
+    session: DbSession,
+    user: CurrentUser,
+    settings: SettingsDep,
+    url: str = Form(...),
+):
+    target = url.strip()
+    fetched = fetch_html(target)
+    if fetched is None:
+        flash(request, "Could not fetch that URL.", "error")
+        return RedirectResponse("/recipes/new", status_code=303)
+
+    html, final_url = fetched
+    data = extract_recipe(html, final_url)
+    if data is None:
+        flash(request, "No recipe information was found on that page.", "error")
+        return RedirectResponse("/recipes/new", status_code=303)
+
+    recipe = Recipe(
+        name=data.name[:255],
+        description=data.description,
+        source_url=(data.source_url or final_url)[:2048],
+        ingredients=data.ingredients,
+        instructions=data.instructions,
+    )
+    recipe.tags = _resolve_tags(session, ", ".join(data.tags))
+    session.add(recipe)
+    session.flush()
+
+    imported_image = False
+    if data.image_url:
+        result = fetch_recipe_image(data.image_url)
+        if result is not None:
+            filename, image_data, content_type = result
+            save_bytes(session, recipe, filename, image_data, content_type, settings.media_dir)
+            imported_image = True
+
+    session.commit()
+    flash(request, f'Imported "{recipe.name}".')
+    if data.image_url and not imported_image:
+        flash(request, "Could not download the recipe image.", "error")
     return RedirectResponse(f"/recipes/{recipe.id}?created=1", status_code=303)
 
 
