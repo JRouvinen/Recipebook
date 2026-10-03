@@ -10,6 +10,10 @@ and this project adheres to semantic versioning.
 - **Import recipe from a URL:** paste a recipe link and Recipebook reads the page's
   schema.org JSON-LD (name, ingredients, instructions, tags, image) and creates the recipe.
   Falls back to the page title / Open Graph metadata when no JSON-LD recipe is present.
+- **Portable archive export/import:** a `.zip` containing the SQLite database, every media
+  file and a manifest — for complete backups and moving between machines. Import validates
+  the archive, backs up the current database and media, then restores.
+- **JSON export:** a readable export of all recipes, their tags and attachment metadata.
 
 ## [1.1.0] — 2026-10-03
 

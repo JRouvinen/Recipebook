@@ -16,7 +16,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Rotation calendar** — fixed or random, weekly or monthly; one recipe every day, every other day or weekly; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
 - **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
-- **Export / import** — download the whole database as a single `.sqlite` file and restore it later.
+- **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
 - **No auth in v1**, but every request flows through an auth hook so it can be added later.
 
@@ -104,6 +104,6 @@ CRUD/search, attachments, tags, the rotation calendar and database export/import
 
 - Single user, no login. Keep it on your LAN or behind your own reverse proxy/auth.
 - Attachments are stored as-is on disk; no image resizing/thumbnails yet.
-- Export/import exchanges the raw `.sqlite` file only (media files are not bundled) —
-  a portable archive is planned (see `Backlog.md`).
+- Backups: use the **full archive (.zip)** to move or restore the database *and* media; the
+  plain `.sqlite` export is database-only and the `.json` export is for reading/interop.
 - SQLite in WAL mode; fine for a household, not for high write concurrency.
