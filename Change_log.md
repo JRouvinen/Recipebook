@@ -21,6 +21,14 @@ and this project adheres to semantic versioning.
   planned in the calendar over any date range, with per-item "used by N recipes" counts and
   tick-off state remembered in the browser.
 
+### Fixed
+- **Recipe import from bot-protected sites:** pages behind Cloudflare bot protection (e.g.
+  `k-ruoka.fi`) returned 403 to plain requests. Fetches now send a realistic browser header
+  set, so the public page is served; error messages also describe the real problem (blocked /
+  not found / timeout / too large) instead of a generic failure.
+- **Nested JSON-LD recipes:** the parser now searches JSON-LD recursively, so recipes nested
+  inside another object (e.g. `WebPage.mainEntity`, as on `k-ruoka.fi`) are found.
+
 ## [1.1.0] — 2026-10-03
 
 ### Added

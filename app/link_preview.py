@@ -20,10 +20,29 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
-USER_AGENT = "Recipebook/1.0 (+https://github.com/JRouvinen/Recipebook)"
+# A realistic browser header set. Some sites (e.g. behind Cloudflare bot protection)
+# return 403 to plain clients but serve the public page when these headers are present.
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+}
+
 MAX_PAGE_BYTES = 5 * 1024 * 1024
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 TIMEOUT = 15.0
+
+
+def new_client() -> httpx.Client:
+    return httpx.Client(follow_redirects=True, timeout=TIMEOUT, headers=BROWSER_HEADERS)
 
 
 class _ImageMetaParser(HTMLParser):
@@ -83,9 +102,7 @@ def fetch_recipe_image(url: str) -> tuple[str, bytes, str] | None:
         return None
 
     try:
-        with httpx.Client(
-            follow_redirects=True, timeout=TIMEOUT, headers={"User-Agent": USER_AGENT}
-        ) as client:
+        with new_client() as client:
             response = client.get(url)
             response.raise_for_status()
             content_type = response.headers.get("content-type", "").split(";")[0].strip()

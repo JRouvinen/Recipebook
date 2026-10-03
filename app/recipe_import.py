@@ -17,7 +17,7 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
-from .link_preview import MAX_PAGE_BYTES, TIMEOUT, USER_AGENT
+from .link_preview import MAX_PAGE_BYTES, new_client
 
 
 @dataclass
@@ -80,14 +80,18 @@ def _iter_objects(data):
             yield from _iter_objects(item)
     elif isinstance(data, dict):
         yield data
-        if data.get("@graph") is not None:
-            yield from _iter_objects(data["@graph"])
+        for value in data.values():
+            if isinstance(value, (dict, list)):
+                yield from _iter_objects(value)
 
 
 def _is_recipe(obj: dict) -> bool:
     types = obj.get("@type")
     types = types if isinstance(types, list) else [types]
-    return any(isinstance(t, str) and t.lower() == "recipe" for t in types)
+    if any(isinstance(t, str) and t.lower() == "recipe" for t in types):
+        return True
+    # Some sites nest recipe fields inside a non-Recipe object (e.g. WebPage.mainEntity).
+    return "recipeIngredient" in obj or "recipeInstructions" in obj
 
 
 def _text(value) -> str:
@@ -170,21 +174,38 @@ def _recipe_from_json_ld(obj: dict, base_url: str) -> ImportedRecipe:
     )
 
 
-def fetch_html(url: str) -> tuple[str, str] | None:
-    """Download a page. Returns ``(html, final_url)`` or ``None`` on any failure."""
+def fetch_html(url: str) -> tuple[str | None, str | None, str | None]:
+    """Download a page.
+
+    Returns ``(html, final_url, error)``. On success ``error`` is ``None``; otherwise
+    ``html``/``final_url`` are ``None`` and ``error`` is a short, user-friendly message.
+    """
     if urlparse(url).scheme not in {"http", "https"}:
-        return None
+        return None, None, "That does not look like a valid http(s) URL."
+
     try:
-        with httpx.Client(
-            follow_redirects=True, timeout=TIMEOUT, headers={"User-Agent": USER_AGENT}
-        ) as client:
+        with new_client() as client:
             response = client.get(url)
-            response.raise_for_status()
-            if len(response.content) > MAX_PAGE_BYTES:
-                return None
-            return response.text, str(response.url)
-    except (httpx.HTTPError, ValueError):
-        return None
+    except httpx.TimeoutException:
+        return None, None, "The site took too long to respond."
+    except httpx.HTTPError:
+        return None, None, "Could not reach that site."
+    except ValueError:
+        return None, None, "That is not a valid URL."
+
+    if response.status_code == 403:
+        return None, None, (
+            "The site blocked the request (403). It may be behind bot protection that "
+            "only lets real browsers through."
+        )
+    if response.status_code == 404:
+        return None, None, "That page was not found (404)."
+    if response.status_code >= 400:
+        return None, None, f"The site returned an error ({response.status_code})."
+    if len(response.content) > MAX_PAGE_BYTES:
+        return None, None, "That page is too large to import."
+
+    return response.text, str(response.url), None
 
 
 def extract_recipe(html: str, base_url: str) -> ImportedRecipe | None:

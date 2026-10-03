@@ -66,6 +66,19 @@ def test_extract_from_graph():
     assert data.ingredients == "water"
 
 
+def test_extract_nested_in_webpage():
+    html = (
+        '<script type="application/ld+json">'
+        '{"@type": "WebPage", "mainEntity": {'
+        '"@type": "Recipe", "name": "Nested Pasta", "recipeIngredient": ["pasta"]}}'
+        "</script>"
+    )
+    data = extract_recipe(html, "https://example.com/pasta")
+    assert data is not None
+    assert data.name == "Nested Pasta"
+    assert data.ingredients == "pasta"
+
+
 def test_extract_falls_back_to_open_graph():
     data = extract_recipe(FALLBACK_HTML, "https://example.com/pie")
     assert data is not None
@@ -85,6 +98,14 @@ def test_extract_decodes_html_entities_in_json_ld():
     assert data.name == "World's & Best"
 
 
+def test_fetch_html_rejects_non_http_scheme():
+    from app.recipe_import import fetch_html
+
+    html, final_url, error = fetch_html("ftp://example.com/file")
+    assert html is None and final_url is None
+    assert error and "valid http" in error
+
+
 def test_import_form_is_available(client):
     assert "Import from URL" in client.get("/recipes/new").text
     assert "Import from URL" in client.get("/").text
@@ -93,7 +114,7 @@ def test_import_form_is_available(client):
 def test_import_route_creates_recipe(client, app, monkeypatch):
     import app.routers.recipes as recipes_router
 
-    monkeypatch.setattr(recipes_router, "fetch_html", lambda url: (JSON_LD_HTML, url))
+    monkeypatch.setattr(recipes_router, "fetch_html", lambda url: (JSON_LD_HTML, url, None))
     monkeypatch.setattr(
         recipes_router,
         "fetch_recipe_image",
@@ -121,19 +142,23 @@ def test_import_route_creates_recipe(client, app, monkeypatch):
 def test_import_route_handles_fetch_failure(client, monkeypatch):
     import app.routers.recipes as recipes_router
 
-    monkeypatch.setattr(recipes_router, "fetch_html", lambda url: None)
+    monkeypatch.setattr(
+        recipes_router, "fetch_html", lambda url: (None, None, "Could not reach that site.")
+    )
     response = client.post(
         "/recipes/import", data={"url": "https://example.com/nope"}, follow_redirects=False
     )
     assert response.status_code == 303
-    assert "Could not fetch" in client.get("/recipes/new").text
+    assert "Could not reach that site" in client.get("/recipes/new").text
 
 
 def test_import_route_handles_missing_recipe_data(client, monkeypatch):
     import app.routers.recipes as recipes_router
 
     monkeypatch.setattr(
-        recipes_router, "fetch_html", lambda url: ("<html><head><title></title></head></html>", url)
+        recipes_router,
+        "fetch_html",
+        lambda url: ("<html><head><title></title></head></html>", url, None),
     )
     response = client.post(
         "/recipes/import", data={"url": "https://example.com/plain"}, follow_redirects=False

@@ -154,13 +154,12 @@ def import_recipe_from_url(
     url: str = Form(...),
 ):
     target = url.strip()
-    fetched = fetch_html(target)
-    if fetched is None:
-        flash(request, "Could not fetch that URL.", "error")
+    html, final_url, error = fetch_html(target)
+    if error:
+        flash(request, error, "error")
         return RedirectResponse("/recipes/new", status_code=303)
 
-    html, final_url = fetched
-    data = extract_recipe(html, final_url)
+    data = extract_recipe(html or "", final_url or target)
     if data is None:
         flash(request, "No recipe information was found on that page.", "error")
         return RedirectResponse("/recipes/new", status_code=303)
