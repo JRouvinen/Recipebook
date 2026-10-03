@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Possible duplicate · {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>Possible duplicate recipe</h1>
+<p class="muted">
+  A similar recipe already exists. Have a look below, then go back or add this one anyway.
+</p>
+
+<ul class="duplicate-list">
+  {% for item in duplicates %}
+  <li>
+    <a href="/recipes/{{ item.recipe.id }}">{{ item.recipe.name }}</a>
+    <span class="muted">— {{ item.reason }}</span>
+  </li>
+  {% endfor %}
+</ul>
+
+<form method="post" action="{{ action }}" enctype="multipart/form-data">
+  {% if import_url %}
+  <input type="hidden" name="url" value="{{ import_url }}">
+  {% else %}
+  {% for field, value in values.items() %}
+  <input type="hidden" name="{{ field }}" value="{{ value }}">
+  {% endfor %}
+  <p class="muted">Any attachments you selected need to be added again after saving.</p>
+  <label>Attachments (optional)
+    <input type="file" name="files" multiple>
+  </label>
+  {% endif %}
+
+  <input type="hidden" name="confirm_duplicate" value="true">
+  <div class="actions">
+    <button class="btn btn-danger" type="submit">Add anyway</button>
+    <a class="btn" href="/recipes/new">Cancel</a>
+  </div>
+</form>
+{% endblock %}

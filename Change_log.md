@@ -9,6 +9,9 @@ and this project adheres to semantic versioning.
 ### Added
 - **Light/dark theme:** a toggle in the nav switches between light and dark palettes, remembered
   per browser. The initial theme follows the OS `prefers-color-scheme` until the user chooses.
+- **Duplicate recipe warning:** adding (or importing) a recipe whose name matches or closely
+  resembles an existing one, or that uses the same source link, now shows a warning listing the
+  matches with an "Add anyway" option instead of saving silently.
 
 ### Documentation
 - README: added an "HTTPS (via Caddy)" section with a ready-to-use `deploy/Caddyfile` and

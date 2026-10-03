@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..auth import CurrentUser
 from ..config import Settings
 from ..deps import DbSession, SettingsDep
+from ..duplicates import find_duplicates
 from ..link_preview import fetch_recipe_image
 from ..models import Recipe, Tag
 from ..recipe_import import extract_recipe, fetch_html
@@ -123,7 +124,30 @@ def create_recipe(
     tags: str = Form(""),
     files: list[UploadFile] = File(default=[]),
     import_image: bool = Form(False),
+    confirm_duplicate: bool = Form(False),
 ):
+    if not confirm_duplicate:
+        duplicates = find_duplicates(session, name, source_url)
+        if duplicates:
+            values = {
+                "name": name,
+                "description": description,
+                "source_url": source_url,
+                "ingredients": ingredients,
+                "instructions": instructions,
+                "tags": tags,
+            }
+            if import_image:
+                values["import_image"] = "true"
+            return render(
+                request,
+                "recipes/duplicate.html",
+                duplicates=duplicates,
+                action="/recipes",
+                import_url="",
+                values=values,
+            )
+
     recipe = Recipe(
         name=name.strip(),
         description=description.strip(),
@@ -152,6 +176,7 @@ def import_recipe_from_url(
     user: CurrentUser,
     settings: SettingsDep,
     url: str = Form(...),
+    confirm_duplicate: bool = Form(False),
 ):
     target = url.strip()
     html, final_url, error = fetch_html(target)
@@ -163,6 +188,18 @@ def import_recipe_from_url(
     if data is None:
         flash(request, "No recipe information was found on that page.", "error")
         return RedirectResponse("/recipes/new", status_code=303)
+
+    if not confirm_duplicate:
+        duplicates = find_duplicates(session, data.name, data.source_url or final_url)
+        if duplicates:
+            return render(
+                request,
+                "recipes/duplicate.html",
+                duplicates=duplicates,
+                action="/recipes/import",
+                import_url=target,
+                values={},
+            )
 
     recipe = Recipe(
         name=data.name[:255],

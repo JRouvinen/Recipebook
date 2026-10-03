@@ -801,6 +801,20 @@ legend {
   margin: 0;
 }
 
+.duplicate-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 1rem;
+}
+
+.duplicate-list li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
   .columns {

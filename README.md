@@ -10,6 +10,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 ## Features
 
 - **Recipes** — name, description, source link, ingredients, instructions.
+- **Duplicate warnings** — adding a recipe that looks like an existing one (same or similar name, or the same source link) asks for confirmation first.
 - **Multiple attachments** — images (with optimised thumbnails in cards and galleries), text files (previewed), anything else (download).
 - **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
