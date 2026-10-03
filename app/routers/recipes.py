@@ -8,9 +8,11 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from ..auth import CurrentUser
+from ..config import Settings
 from ..deps import DbSession, SettingsDep
+from ..link_preview import fetch_recipe_image
 from ..models import Recipe, Tag
-from ..storage import delete_upload, read_text, save_upload
+from ..storage import delete_upload, read_text, save_bytes, save_upload
 from ..templating import flash, render
 from ..utils import parse_tag_names
 
@@ -44,6 +46,18 @@ def _all_tags(session: Session) -> list[Tag]:
 
 def _form_context(session: Session, recipe: Recipe | None, form_tags: str) -> dict:
     return {"recipe": recipe, "all_tags": _all_tags(session), "form_tags": form_tags}
+
+
+def _import_image_from_link(session: Session, recipe: Recipe, settings: Settings) -> bool:
+    """Try to download a preview image from the recipe's source link."""
+    if not recipe.source_url:
+        return False
+    result = fetch_recipe_image(recipe.source_url)
+    if result is None:
+        return False
+    filename, data, content_type = result
+    save_bytes(session, recipe, filename, data, content_type, settings.media_dir)
+    return True
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -107,6 +121,7 @@ def create_recipe(
     instructions: str = Form(""),
     tags: str = Form(""),
     files: list[UploadFile] = File(default=[]),
+    import_image: bool = Form(False),
 ):
     recipe = Recipe(
         name=name.strip(),
@@ -121,9 +136,12 @@ def create_recipe(
     for upload in files:
         if upload and upload.filename:
             save_upload(session, recipe, upload, settings.media_dir)
+    imported = _import_image_from_link(session, recipe, settings) if import_image else False
     session.commit()
     flash(request, f'Recipe "{recipe.name}" created.')
-    return RedirectResponse(f"/recipes/{recipe.id}", status_code=303)
+    if import_image and not imported:
+        flash(request, "Could not import an image from the source link.", "error")
+    return RedirectResponse(f"/recipes/{recipe.id}?created=1", status_code=303)
 
 
 @router.get("/recipes/{recipe_id}/edit", response_class=HTMLResponse)
@@ -147,6 +165,7 @@ def update_recipe(
     instructions: str = Form(""),
     tags: str = Form(""),
     files: list[UploadFile] = File(default=[]),
+    import_image: bool = Form(False),
 ):
     recipe = _get_recipe(session, recipe_id)
     recipe.name = name.strip()
@@ -158,8 +177,11 @@ def update_recipe(
     for upload in files:
         if upload and upload.filename:
             save_upload(session, recipe, upload, settings.media_dir)
+    imported = _import_image_from_link(session, recipe, settings) if import_image else False
     session.commit()
     flash(request, f'Recipe "{recipe.name}" updated.')
+    if import_image and not imported:
+        flash(request, "Could not import an image from the source link.", "error")
     return RedirectResponse(f"/recipes/{recipe.id}", status_code=303)
 
 
@@ -188,3 +210,22 @@ def delete_recipe(
     session.commit()
     flash(request, f'Recipe "{name}" deleted.', "info")
     return RedirectResponse("/", status_code=303)
+
+
+@router.post("/recipes/{recipe_id}/import-image")
+def import_image_from_link(
+    request: Request,
+    session: DbSession,
+    user: CurrentUser,
+    settings: SettingsDep,
+    recipe_id: int,
+):
+    recipe = _get_recipe(session, recipe_id)
+    if not recipe.source_url:
+        flash(request, "This recipe has no source link to import from.", "error")
+    elif _import_image_from_link(session, recipe, settings):
+        session.commit()
+        flash(request, "Image imported from the source link.")
+    else:
+        flash(request, "Could not find an image at the source link.", "error")
+    return RedirectResponse(f"/recipes/{recipe_id}", status_code=303)

@@ -119,6 +119,7 @@ class RotationPlan(Base):
     interval: Mapped[str] = mapped_column(String(20), default="weekly")  # weekly | monthly
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     start_date: Mapped[date] = mapped_column(Date, default=date.today)
+    spacing: Mapped[int] = mapped_column(Integer, default=1)  # days between planned recipes
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     items: Mapped[list["RotationItem"]] = relationship(

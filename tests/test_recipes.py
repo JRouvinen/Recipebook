@@ -105,3 +105,58 @@ def test_tag_management(client, make_recipe, app):
 
     response = client.post(f"/tags/{tag.id}/delete", follow_redirects=False)
     assert response.status_code == 303
+
+
+def test_create_redirects_with_created_flag(client):
+    response = client.post("/recipes", data={"name": "Fresh"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"].endswith("?created=1")
+    assert "Add another recipe" in client.get(response.headers["location"]).text
+
+
+def test_quick_add_tag_chips_rendered(client, make_recipe):
+    make_recipe("Curry", tags="Dinner, Spicy")
+    page = client.get("/recipes/new")
+    assert 'data-quick-tag="Dinner"' in page.text
+    assert 'data-quick-tag="Spicy"' in page.text
+
+
+def test_import_image_from_link_on_create(client, app, monkeypatch):
+    import app.routers.recipes as recipes_router
+
+    monkeypatch.setattr(
+        recipes_router,
+        "fetch_recipe_image",
+        lambda url: ("food.jpg", b"\xff\xd8\xff\xe0fake-image", "image/jpeg"),
+    )
+    response = client.post(
+        "/recipes",
+        data={"name": "Linked", "source_url": "https://example.com/recipe", "import_image": "true"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    with app.state.db.session() as session:
+        attachments = session.execute(select(Attachment)).scalars().all()
+    assert len(attachments) == 1
+    assert attachments[0].kind == "image"
+    assert attachments[0].original_name == "food.jpg"
+
+
+def test_import_image_button_and_failure(client, make_recipe, monkeypatch):
+    import app.routers.recipes as recipes_router
+
+    recipe_id = make_recipe("With link", source_url="https://example.com/recipe")
+    assert "Import image from link" in client.get(f"/recipes/{recipe_id}").text
+
+    monkeypatch.setattr(recipes_router, "fetch_recipe_image", lambda url: None)
+    response = client.post(f"/recipes/{recipe_id}/import-image", follow_redirects=False)
+    assert response.status_code == 303
+    assert "Could not find an image" in client.get(f"/recipes/{recipe_id}").text
+
+
+def test_import_image_requires_source_link(client, make_recipe, monkeypatch):
+    recipe_id = make_recipe("No link")
+    response = client.post(f"/recipes/{recipe_id}/import-image", follow_redirects=False)
+    assert response.status_code == 303
+    assert "no source link" in client.get(f"/recipes/{recipe_id}").text

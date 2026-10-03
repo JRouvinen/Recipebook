@@ -2,6 +2,13 @@
 {% block title %}{{ recipe.name }} · {{ app_name }}{% endblock %}
 
 {% block content %}
+{% if request.query_params.get('created') %}
+<div class="flash success">
+  Recipe saved.
+  <a class="btn btn-small" href="/recipes/new" style="margin-left:.4rem">+ Add another recipe</a>
+</div>
+{% endif %}
+
 <div class="page-head">
   <h1>{{ recipe.name }}</h1>
   <div class="actions">
@@ -82,4 +89,11 @@
   <input type="file" name="files" multiple required>
   <button class="btn" type="submit">Upload</button>
 </form>
+
+{% if recipe.source_url %}
+<form class="inline" method="post" action="/recipes/{{ recipe.id }}/import-image" style="margin-top:.6rem">
+  <button class="btn" type="submit">Import image from link</button>
+  <span class="muted">Uses the source link above</span>
+</form>
+{% endif %}
 {% endblock %}

@@ -22,6 +22,15 @@
         <option value="monthly">Monthly</option>
       </select>
     </label>
+    <label>Recipe frequency
+      <select name="spacing">
+        <option value="1">Every day</option>
+        <option value="2">Every other day</option>
+        <option value="3">Every 3 days</option>
+        <option value="4">Every 4 days</option>
+        <option value="7">Once a week</option>
+      </select>
+    </label>
     <label>Start date
       <input type="date" name="start_date" value="{{ today.isoformat() }}">
     </label>

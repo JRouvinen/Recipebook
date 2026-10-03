@@ -1,17 +1,21 @@
 """Rotation-calendar logic.
 
-A plan assigns **one recipe per day**. ``interval`` controls the repeating cycle
-length (weekly = 7 days, monthly = 30 days); the chosen recipes wrap/repeat:
+A plan assigns a recipe on a repeating schedule:
 
-* ``fixed``  – recipes from the plan (ordered) are laid out one per day and repeat
-  every cycle.
-* ``random`` – a random recipe is chosen for each day, avoiding an immediate repeat.
-  Choices are persisted as ``CalendarEntry`` rows, so the schedule is stable and can
-  be marked cooked/skipped or swapped.
+* ``interval`` controls the repeating cycle length in days (weekly = 7, monthly = 30).
+* ``spacing`` is the number of days between planned recipes (1 = every day,
+  2 = every other day, ...). Gap days have no entry.
+* ``fixed``  – recipes from the plan (ordered) advance one per planned day and repeat.
+* ``random`` – a random recipe is chosen for each planned day, avoiding an immediate
+  repeat.
+
+Choices are persisted as ``CalendarEntry`` rows, so the schedule is stable and can be
+marked cooked/skipped or swapped.
 """
 
 from __future__ import annotations
 
+import math
 import random
 from datetime import date, timedelta
 
@@ -25,6 +29,10 @@ CYCLE_LENGTHS = {"weekly": 7, "monthly": 30}
 
 def cycle_length(plan: RotationPlan) -> int:
     return CYCLE_LENGTHS.get(plan.interval, 7)
+
+
+def plan_spacing(plan: RotationPlan) -> int:
+    return max(int(plan.spacing or 1), 1)
 
 
 def plan_pool(session: Session, plan: RotationPlan) -> list[int]:
@@ -44,10 +52,16 @@ def plan_pool(session: Session, plan: RotationPlan) -> list[int]:
     return [r.id for r in session.execute(select(Recipe).order_by(Recipe.name)).scalars().all()]
 
 
-def _pick_fixed(pool: list[int], plan: RotationPlan, day: date) -> int:
-    offset = max((day - plan.start_date).days, 0)
-    index = (offset % cycle_length(plan)) % len(pool)
-    return pool[index]
+def recipe_slot(plan: RotationPlan, offset_days: int) -> int:
+    """Index (in planned days) of a day, accounting for the plan's spacing and cycle.
+
+    Because only every ``spacing``-th day gets a recipe, the slot advances once per
+    planned day and the whole pattern repeats every ``interval`` days.
+    """
+    spacing = plan_spacing(plan)
+    cycle = cycle_length(plan)
+    slots_per_cycle = math.ceil(cycle / spacing)
+    return (offset_days // cycle) * slots_per_cycle + (offset_days % cycle) // spacing
 
 
 def _pick_random(pool: list[int], last_recipe_id: int | None, rng: random.Random) -> int:
@@ -62,7 +76,10 @@ def generate_entries(
     end: date,
     rng: random.Random | None = None,
 ) -> int:
-    """Create any missing ``CalendarEntry`` rows for ``plan`` between two dates."""
+    """Create any missing ``CalendarEntry`` rows for ``plan`` between two dates.
+
+    Gap days (when ``spacing`` > 1) intentionally get no entry.
+    """
     if end < start:
         start, end = end, start
     rng = rng or random.Random()
@@ -88,24 +105,37 @@ def generate_entries(
     ).scalar_one_or_none()
     last_recipe_id = previous.recipe_id if previous else None
 
+    spacing = plan_spacing(plan)
     pool = plan_pool(session, plan)
     created = 0
     day = start
     while day <= end:
         entry = existing.get(day)
-        if entry is None:
-            if not pool:
-                recipe_id = None
-            elif plan.mode == "random":
+        if entry is not None:
+            if entry.recipe_id is not None:
+                last_recipe_id = entry.recipe_id
+            day += timedelta(days=1)
+            continue
+
+        offset = max((day - plan.start_date).days, 0)
+        if spacing > 1 and offset % spacing != 0:
+            day += timedelta(days=1)
+            continue
+
+        if pool:
+            if plan.mode == "random":
                 recipe_id = _pick_random(pool, last_recipe_id, rng)
             else:
-                recipe_id = _pick_fixed(pool, plan, day)
-            entry = CalendarEntry(
-                plan_id=plan.id, entry_date=day, recipe_id=recipe_id, status="planned"
-            )
-            session.add(entry)
-            created += 1
-        last_recipe_id = entry.recipe_id
+                recipe_id = pool[recipe_slot(plan, offset) % len(pool)]
+        else:
+            recipe_id = None
+
+        entry = CalendarEntry(
+            plan_id=plan.id, entry_date=day, recipe_id=recipe_id, status="planned"
+        )
+        session.add(entry)
+        created += 1
+        last_recipe_id = recipe_id
         day += timedelta(days=1)
 
     if created:

@@ -12,23 +12,24 @@ from .models import Attachment, Recipe
 from .utils import classify_attachment
 
 
-def save_upload(
-    session: Session, recipe: Recipe, upload: UploadFile, media_dir: Path
+def save_bytes(
+    session: Session,
+    recipe: Recipe,
+    filename: str,
+    data: bytes,
+    content_type: str,
+    media_dir: Path,
 ) -> Attachment | None:
-    """Persist an uploaded file to ``media_dir`` and register it in the DB."""
-    original_name = Path(upload.filename or "").name
-    if not original_name:
-        return None
-
-    data = upload.file.read()
-    if not data:
+    """Persist raw bytes to ``media_dir`` and register them as an attachment."""
+    original_name = Path(filename or "").name
+    if not original_name or not data:
         return None
 
     suffix = Path(original_name).suffix.lower()
     stored_name = f"{uuid.uuid4().hex}{suffix}"
     (media_dir / stored_name).write_bytes(data)
 
-    content_type = upload.content_type or "application/octet-stream"
+    content_type = content_type or "application/octet-stream"
     attachment = Attachment(
         recipe=recipe,
         original_name=original_name,
@@ -39,6 +40,17 @@ def save_upload(
     )
     session.add(attachment)
     return attachment
+
+
+def save_upload(
+    session: Session, recipe: Recipe, upload: UploadFile, media_dir: Path
+) -> Attachment | None:
+    """Persist an uploaded file to ``media_dir`` and register it in the DB."""
+    filename = Path(upload.filename or "").name
+    if not filename:
+        return None
+    data = upload.file.read()
+    return save_bytes(session, recipe, filename, data, upload.content_type or "", media_dir)
 
 
 def delete_upload(media_dir: Path, attachment: Attachment) -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -43,6 +43,7 @@ class Database:
 
     def create_all(self) -> None:
         Base.metadata.create_all(self.engine)
+        apply_migrations(self.engine)
 
     def session(self) -> Session:
         return self.session_factory()
@@ -56,3 +57,31 @@ class Database:
 
     def dispose(self) -> None:
         self.engine.dispose()
+
+
+# ---------------------------------------------------------------------------
+# Lightweight additive migrations
+#
+# ``Base.metadata.create_all`` only creates missing tables - it never alters an
+# existing one. For the small additive changes this project needs, we add the
+# missing columns by hand. Each entry is ``table -> {column: column DDL}`` and
+# the operation is idempotent, so it is safe to run on every startup.
+# ---------------------------------------------------------------------------
+ADDITIVE_COLUMNS: dict[str, dict[str, str]] = {
+    "rotation_plans": {
+        "spacing": "INTEGER NOT NULL DEFAULT 1",
+    },
+}
+
+
+def apply_migrations(engine: Engine) -> None:
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+    for table, columns in ADDITIVE_COLUMNS.items():
+        if table not in existing_tables:
+            continue
+        present = {column["name"] for column in inspector.get_columns(table)}
+        for name, ddl in columns.items():
+            if name not in present:
+                with engine.begin() as connection:
+                    connection.exec_driver_sql(f'ALTER TABLE {table} ADD COLUMN {name} {ddl}')

@@ -11,9 +11,10 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 
 - **Recipes** — name, description, source link, ingredients, instructions.
 - **Multiple attachments** — images (shown inline), text files (previewed), anything else (download).
-- **Tags** — create them inline, then filter recipes by one or more tags.
+- **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
-- **Rotation calendar** — fixed or random, weekly or monthly; one recipe per day; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
+- **Rotation calendar** — fixed or random, weekly or monthly; one recipe every day, every other day or weekly; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
+- **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
 - **Export / import** — download the whole database as a single `.sqlite` file and restore it later.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
 - **No auth in v1**, but every request flows through an auth hook so it can be added later.

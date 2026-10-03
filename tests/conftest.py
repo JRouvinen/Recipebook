@@ -40,6 +40,7 @@ def make_recipe(client):
             "/recipes", data={"name": name, **fields}, follow_redirects=False
         )
         assert response.status_code == 303, response.text
-        return int(response.headers["location"].rstrip("/").rsplit("/", 1)[-1])
+        location = response.headers["location"].split("?")[0]
+        return int(location.rstrip("/").rsplit("/", 1)[-1])
 
     return _make

@@ -6,6 +6,22 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-10-03
+
+### Added
+- **Quick-add tags:** the recipe form now shows existing tags as clickable chips that
+  append to the tag field, alongside free-text entry.
+- **"Add another recipe"** shortcut shown after saving a new recipe.
+- **Calendar recipe spacing:** plans can place a recipe every day, every other day, every
+  3/4 days or weekly, leaving gap days empty.
+- **Import food image from the recipe link:** fetch the page at the recipe's source link
+  and attach the best preview image (`og:image`, `twitter:image` or the first `<img>`),
+  via a checkbox when saving or a button on the recipe page.
+
+### Fixed
+- Flash messages queued while another flash was already pending were silently dropped
+  (Starlette's session only persists explicit assignments).
+
 ## [1.0.0] — 2026-10-02
 
 Initial release: a self-hosted, Docker-deployable recipe book.

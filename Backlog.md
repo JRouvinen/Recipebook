@@ -78,6 +78,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
+## Enhancements (v1.1)  ✅ *(complete)*
+- [x] Possibility to quick add tags instead of writing them
+- [x] After adding a new recipe -> the page could have "Add another recipe" button
+- [x] In calendar creation, there could be way to have new recipe every other day instead of every day
+- [x] Possibility to import image of the food from recipe link
+
 ## Future (post-v1.0)
 - [ ] Optional user accounts / login behind the existing auth hook
 - [ ] Portable archive export (DB + media as a zip) and JSON export
@@ -89,3 +95,5 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Drag-and-drop ordering of recipes in a fixed plan
 - [ ] PWA / offline support
 - [ ] "What's for dinner" notifications
+
+

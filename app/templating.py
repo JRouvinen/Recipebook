@@ -31,8 +31,14 @@ templates.env.filters["human_size"] = human_size
 
 
 def flash(request: Request, message: str, category: str = "success") -> None:
-    """Queue a one-shot flash message for the next rendered page."""
-    request.session.setdefault("_flashes", []).append({"message": message, "category": category})
+    """Queue a one-shot flash message for the next rendered page.
+
+    The list is reassigned (not mutated in place) so Starlette's session
+    middleware notices the change and re-issues the session cookie.
+    """
+    flashes = list(request.session.get("_flashes", []))
+    flashes.append({"message": message, "category": category})
+    request.session["_flashes"] = flashes
 
 
 def render(request: Request, name: str, status_code: int = 200, **context: Any):

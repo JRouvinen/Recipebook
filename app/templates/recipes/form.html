@@ -27,13 +27,29 @@
   </label>
 
   <label>Tags
-    <input type="text" name="tags" value="{{ form_tags }}" placeholder="Vegetarian, Chicken, Quick">
-    <span class="muted">Separate with commas. New tags are created automatically.</span>
+    <input type="text" id="tags-input" name="tags" value="{{ form_tags }}" placeholder="Vegetarian, Chicken, Quick">
+    <span class="muted">Separate with commas — or click a tag below to add it quickly.</span>
   </label>
+
+  {% if all_tags %}
+  <div class="tag-quickadd">
+    <span class="muted">Quick add:</span>
+    <div class="tag-filter" data-quick-tags>
+      {% for t in all_tags %}
+      <button type="button" class="chip" data-quick-tag="{{ t.name }}">{{ t.name }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <label>Add attachments
     <input type="file" name="files" multiple>
     <span class="muted">Images, text files, PDFs — multiple allowed.</span>
+  </label>
+
+  <label class="check">
+    <input type="checkbox" name="import_image" value="true">
+    Try to import a preview image from the source link
   </label>
 
   <div class="actions">
@@ -59,4 +75,8 @@
   {% endfor %}
 </ul>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ request.url_for('static', path='js/recipe-form.js') }}" defer></script>
 {% endblock %}

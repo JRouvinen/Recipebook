@@ -294,7 +294,9 @@ a.card:hover {
   background: var(--surface);
   border-radius: 999px;
   padding: 0.2rem 0.7rem;
+  font-family: inherit;
   font-size: 0.85rem;
+  color: inherit;
   cursor: pointer;
 }
 
@@ -306,6 +308,14 @@ a.card:hover {
 
 .chip input {
   margin: 0;
+}
+
+.tag-quickadd {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: -0.4rem 0 0.9rem;
 }
 
 /* ---------- forms ---------- */

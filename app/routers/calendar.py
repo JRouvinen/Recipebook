@@ -51,6 +51,7 @@ def create_plan(
     mode: str = Form("fixed"),
     interval: str = Form("weekly"),
     start_date: str = Form(""),
+    spacing: int = Form(1),
     recipes: list[int] = Form(default=[]),
 ):
     plan = RotationPlan(
@@ -58,6 +59,7 @@ def create_plan(
         mode=mode if mode in {"fixed", "random"} else "fixed",
         interval=interval if interval in {"weekly", "monthly"} else "weekly",
         start_date=parse_date(start_date),
+        spacing=max(1, min(int(spacing or 1), 30)),
         active=True,
     )
     session.add(plan)
