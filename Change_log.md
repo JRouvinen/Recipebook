@@ -6,7 +6,7 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
-## [1.3.0] — 2026-10-03
+## [1.4.0] — 2026-10-03
 
 ### Added
 - **Structured ingredients + unit parsing:** ingredient lines are parsed into quantity, unit,
@@ -14,6 +14,13 @@ and this project adheres to semantic versioning.
   set of units including Finnish ones). The shopping list now **combines quantities** for
   matching ingredients (two recipes using "2 tomatoes" each become one "4 tomatoes" line)
   instead of only counting occurrences.
+- **PWA / offline support:** a web app manifest and icons make Recipebook installable as a
+  standalone app, and a service worker caches the app shell and previously viewed pages so it
+  keeps working offline (with an offline fallback page). The runtime cache is cleared on logout.
+
+## [1.3.0] — 2026-10-03
+
+### Added
 - **Multiple meals per day:** calendar plans can schedule separate recipes for breakfast,
   lunch, dinner and snack slots, each tracked (cooked / skipped / swap) independently. Plans
   without meals behave as before, and existing databases are migrated automatically (the

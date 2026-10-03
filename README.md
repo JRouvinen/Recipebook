@@ -19,6 +19,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
+- **Installable / offline** — a web app manifest + service worker let you install it as an app and keep using previously viewed pages offline.
 - **Optional login** — off by default; turn it on with a username and password (PBKDF2-hashed, no extra dependencies) to protect the whole app.
 
 ## Stack
@@ -122,6 +123,13 @@ Alternatively set `RECIPEBOOK_AUTH_PASSWORD` and it is hashed in memory at start
 enabled, every request except the login page and static assets requires a session and is
 otherwise redirected to `/login` (returning you to the page you asked for afterwards).
 
+## Install as an app (PWA)
+
+Recipebook ships a web app manifest, icons and a service worker. Open it in a supported
+browser and use **Install** / **Add to Home Screen** to run it standalone. The service worker
+caches the app shell and previously viewed pages, so the app keeps working offline (an offline
+page is shown for anything not cached). Logging out clears the cached pages.
+
 ## Project layout
 
 ```
@@ -142,7 +150,7 @@ app/
   middleware.py         # optional login gate
   auth.py               # current-user resolution
   deps.py / templating.py / utils.py
-  routers/              # auth, recipes, tags, attachments, calendar, shopping, data
+  routers/              # auth, pwa, recipes, tags, attachments, calendar, shopping, data
   templates/            # Jinja2 templates
   static/               # CSS + vendored HTMX + small JS helpers
 tests/                  # pytest suite

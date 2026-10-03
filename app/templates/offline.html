@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Offline · {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="panel login-panel">
+  <h1>You're offline</h1>
+  <p class="muted">
+    Recipebook can't reach the server right now. Pages you've already visited may still
+    be available.
+  </p>
+  <a class="btn btn-primary" href="/">Try again</a>
+</div>
+{% endblock %}

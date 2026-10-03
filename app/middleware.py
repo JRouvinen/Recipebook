@@ -14,7 +14,15 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-PUBLIC_PATHS = {"/login", "/logout", "/favicon.ico", "/health"}
+PUBLIC_PATHS = {
+    "/login",
+    "/logout",
+    "/favicon.ico",
+    "/health",
+    "/sw.js",
+    "/manifest.webmanifest",
+    "/offline",
+}
 PUBLIC_PREFIXES = ("/static/",)
 
 

@@ -14,7 +14,7 @@ from . import models  # noqa: F401 - importing registers all models on Base.meta
 from .config import Settings, get_settings
 from .database import Database
 from .middleware import AuthMiddleware
-from .routers import attachments, auth, calendar, data, recipes, shopping, tags
+from .routers import attachments, auth, calendar, data, pwa, recipes, shopping, tags
 from .templating import render
 
 
@@ -42,6 +42,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
     app.include_router(auth.router)
+    app.include_router(pwa.router)
     app.include_router(recipes.router)
     app.include_router(tags.router)
     app.include_router(attachments.router)

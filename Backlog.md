@@ -93,7 +93,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Image thumbnails + optimisation
 - [x] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
 - [ ] Drag-and-drop ordering of recipes in a fixed plan
-- [ ] PWA / offline support
+- [x] PWA / offline support
 - [ ] "What's for dinner" notifications
 
 
