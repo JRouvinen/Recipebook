@@ -130,6 +130,56 @@ browser and use **Install** / **Add to Home Screen** to run it standalone. The s
 caches the app shell and previously viewed pages, so the app keeps working offline (an offline
 page is shown for anything not cached). Logging out clears the cached pages.
 
+## HTTPS (via Caddy)
+
+Service workers and PWA install only work in a **secure context** (`https://…` or
+`localhost`). To reach Recipebook over HTTPS on the LAN, run **Caddy** in front of it — it
+manages certificates automatically, and for a LAN hostname it can issue them from its own
+internal CA.
+
+The repo includes a Caddyfile and a compose overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
+```
+
+`deploy/Caddyfile`:
+
+```caddyfile
+recipebook.home.arpa {
+	tls internal
+	encode gzip zstd
+	reverse_proxy recipebook:8000
+}
+```
+
+Then:
+
+1. Point `recipebook.home.arpa` at the Docker host — a local DNS record (e.g. in your
+   Technitium / Pi-hole) or an `/etc/hosts` entry. Using the host's IP address in the
+   Caddyfile works too.
+2. Trust Caddy's root CA on each device (extract it once):
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.caddy.yml exec caddy \
+     cat /data/caddy/pki/authorities/local/root.crt > caddy-root.crt
+   ```
+   Install `caddy-root.crt` into your OS / browser trust store.
+3. Open `https://recipebook.home.arpa` — the app is now installable and works offline.
+
+For a **public domain** that resolves to this host, replace the site block with:
+
+```caddyfile
+recipebook.example.com {
+	tls you@example.com
+	reverse_proxy recipebook:8000
+}
+```
+
+Caddy will obtain a Let's Encrypt certificate (ports 80/443 must be reachable).
+
+> Tip: to stop exposing the plain-HTTP app port, change the base `docker-compose.yml` mapping
+> from `"8000:8000"` to `"127.0.0.1:8000:8000"`.
+
 ## Project layout
 
 ```
@@ -156,6 +206,9 @@ app/
 tests/                  # pytest suite
 seed.py                 # sample data
 hash_password.py        # generate RECIPEBOOK_AUTH_PASSWORD_HASH
+scripts/make_icons.py   # regenerate the PWA icons
+deploy/Caddyfile        # optional HTTPS reverse-proxy example
+docker-compose.caddy.yml # optional Caddy overlay
 Backlog.md              # project plan
 Requirements.md         # original requirements
 Change_log.md           # changelog

@@ -1,0 +1,23 @@
+# Optional overlay that puts Caddy in front of Recipebook with automatic HTTPS.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d --build
+#
+# See deploy/Caddyfile and the "HTTPS (via Caddy)" section of the README.
+services:
+  caddy:
+    image: caddy:2
+    container_name: recipebook-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - recipebook
+
+volumes:
+  caddy-data:
+  caddy-config:

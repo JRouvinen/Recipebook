@@ -6,6 +6,11 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+### Documentation
+- README: added an "HTTPS (via Caddy)" section with a ready-to-use `deploy/Caddyfile` and
+  `docker-compose.caddy.yml` overlay (for PWA/offline over the LAN), plus how to trust
+  Caddy's internal CA.
+
 ## [1.4.0] — 2026-10-03
 
 ### Added

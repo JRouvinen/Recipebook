@@ -1,0 +1,24 @@
+# Caddy reverse proxy for Recipebook with automatic HTTPS.
+#
+# Replace the hostname with one that resolves to this Docker host — a local DNS
+# record (e.g. Technitium / Pi-hole) or an /etc/hosts entry. You can also use the
+# host's IP address here.
+#
+# For a LAN hostname we use Caddy's own internal CA ("tls internal"); devices must
+# trust Caddy's root certificate (see the README).
+#
+# For a PUBLIC domain that resolves to this host, delete the "tls internal" line
+# and add an email for Let's Encrypt, e.g.:
+#
+#     recipebook.example.com {
+#         tls you@example.com
+#         reverse_proxy recipebook:8000
+#     }
+#
+# The "recipebook" upstream name comes from docker-compose.yml's service name.
+
+recipebook.home.arpa {
+	tls internal
+	encode gzip zstd
+	reverse_proxy recipebook:8000
+}
