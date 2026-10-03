@@ -1,11 +1,12 @@
-"""Shopping list generation from planned recipes."""
+"""Shopping list generation from planned recipes (with quantity combining)."""
 
 from __future__ import annotations
 
 from sqlalchemy import select
 
+from app.ingredients import clean_lines
 from app.models import CalendarEntry
-from app.shopping import build_shopping_list, parse_ingredients
+from app.shopping import build_shopping_list
 
 
 class _Recipe:
@@ -13,21 +14,36 @@ class _Recipe:
         self.ingredients = ingredients
 
 
-def test_parse_ingredients_strips_markers_and_blank_lines():
+def test_clean_lines_strips_markers_and_blank_lines():
     text = "- 200 g pasta\n* 2 tomatoes\n1. onion\n\n  salt  \n"
-    assert parse_ingredients(text) == ["200 g pasta", "2 tomatoes", "onion", "salt"]
+    assert clean_lines(text) == ["200 g pasta", "2 tomatoes", "onion", "salt"]
 
 
-def test_build_shopping_list_merges_duplicates_and_counts():
+def test_build_shopping_list_combines_matching_ingredients():
     items = build_shopping_list(
-        [_Recipe("- 2 tomatoes\n200 g pasta"), _Recipe("2 tomatoes\n1 cucumber")]
+        [
+            _Recipe("- 2 tomatoes\n200 g flour\n1 tsp salt"),
+            _Recipe("2 tomatoes\n1 cucumber\n1 tsp salt"),
+        ]
     )
     by_text = {item.text: item for item in items}
-    assert set(by_text) == {"2 tomatoes", "200 g pasta", "1 cucumber"}
-    assert by_text["2 tomatoes"].count == 2
-    assert by_text["200 g pasta"].count == 1
-    # sorted case-insensitively
-    assert [item.text for item in items] == ["1 cucumber", "2 tomatoes", "200 g pasta"]
+    assert "4 tomatoes" in by_text
+    assert "2 tsp salt" in by_text
+    assert "200 g flour" in by_text
+    assert "1 cucumber" in by_text
+    assert by_text["4 tomatoes"].count == 2
+    assert by_text["200 g flour"].count == 1
+
+
+def test_build_shopping_list_keeps_different_units_separate():
+    items = build_shopping_list([_Recipe("200 g flour"), _Recipe("1 cup flour")])
+    assert {item.text for item in items} == {"200 g flour", "1 cup flour"}
+
+
+def test_build_shopping_list_keeps_unquantified_items():
+    items = build_shopping_list([_Recipe("Salt and pepper to taste")])
+    assert items[0].text == "Salt and pepper to taste"
+    assert items[0].quantity is None
 
 
 def test_build_shopping_list_handles_missing_ingredients():
@@ -55,10 +71,9 @@ def test_shopping_list_from_plan(client, make_recipe):
     page = client.get("/shopping-list?start=2026-01-05&end=2026-01-11").text
     assert "200 g pasta" in page
     assert "1 cucumber" in page
-    # "2 tomatoes" is used by both recipes but listed once, with a "2x" badge
-    assert page.count('<span class="item-text">2 tomatoes</span>') == 1
-    assert page.count('<span class="item-text">') == 3
-    assert "2&times;" in page
+    # "2 tomatoes" from both recipes is combined into a single line
+    assert page.count('<span class="item-text">4 tomatoes</span>') == 1
+    assert "2&times;" in page  # used by 2 recipes
 
 
 def test_shopping_list_empty_range(client):
@@ -85,9 +100,7 @@ def test_shopping_list_exclude_cooked(client, app, make_recipe):
 
     with app.state.db.session() as session:
         entry_id = (
-            session.execute(
-                select(CalendarEntry).where(CalendarEntry.plan_id == plan_id)
-            )
+            session.execute(select(CalendarEntry).where(CalendarEntry.plan_id == plan_id))
             .scalars()
             .first()
             .id

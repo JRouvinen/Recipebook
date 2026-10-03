@@ -9,6 +9,11 @@ and this project adheres to semantic versioning.
 ## [1.3.0] — 2026-10-03
 
 ### Added
+- **Structured ingredients + unit parsing:** ingredient lines are parsed into quantity, unit,
+  name and note (decimals, fractions, mixed numbers, unicode fractions, ranges, and a broad
+  set of units including Finnish ones). The shopping list now **combines quantities** for
+  matching ingredients (two recipes using "2 tomatoes" each become one "4 tomatoes" line)
+  instead of only counting occurrences.
 - **Multiple meals per day:** calendar plans can schedule separate recipes for breakfast,
   lunch, dinner and snack slots, each tracked (cooked / skipped / swap) independently. Plans
   without meals behave as before, and existing databases are migrated automatically (the

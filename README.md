@@ -14,7 +14,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
 - **Rotation calendar** — fixed or random, weekly or monthly; one recipe or several meals per day (breakfast/lunch/dinner/snack); a recipe every day, every other day or weekly; wraps/repeats; mark each meal *cooked* / *skipped* / reset, or swap in another recipe.
-- **Shopping list** — generate a merged, de-duplicated ingredient list from the recipes planned over any date range.
+- **Shopping list** — generate a merged ingredient list from the recipes planned over any date range, combining quantities for matching items (e.g. "2 tomatoes" + "2 tomatoes" → "4 tomatoes").
 - **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
@@ -133,6 +133,7 @@ app/
   models.py             # Recipe, Tag, Attachment, RotationPlan, RotationItem, CalendarEntry
   calendar_service.py   # fixed/random scheduling with configurable spacing
   shopping.py           # merge planned recipes into a shopping list
+  ingredients.py        # parse free-text ingredient lines into quantity/unit/name
   storage.py            # attachment files on disk
   link_preview.py       # find + fetch a page's preview image
   recipe_import.py      # parse schema.org JSON-LD from a recipe URL

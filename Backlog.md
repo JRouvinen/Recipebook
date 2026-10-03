@@ -88,7 +88,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Optional user accounts / login behind the existing auth hook
 - [x] Portable archive export (DB + media as a zip) and JSON export
 - [x] Shopping list generated from planned recipes
-- [ ] Structured ingredients + unit parsing
+- [x] Structured ingredients + unit parsing
 - [x] Import recipe from a URL (schema.org / JSON-LD)
 - [x] Image thumbnails + optimisation
 - [x] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
