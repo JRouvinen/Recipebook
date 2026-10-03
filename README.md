@@ -10,7 +10,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 ## Features
 
 - **Recipes** — name, description, source link, ingredients, instructions.
-- **Multiple attachments** — images (shown inline), text files (previewed), anything else (download).
+- **Multiple attachments** — images (with optimised thumbnails in cards and galleries), text files (previewed), anything else (download).
 - **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
 - **Rotation calendar** — fixed or random, weekly or monthly; one recipe or several meals per day (breakfast/lunch/dinner/snack); a recipe every day, every other day or weekly; wraps/repeats; mark each meal *cooked* / *skipped* / reset, or swap in another recipe.
@@ -28,6 +28,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 | Backend  | FastAPI + Uvicorn                        |
 | Database | SQLite via SQLAlchemy 2.0                |
 | UI       | Jinja2 templates + HTMX + hand-written CSS |
+| Images   | Pillow (thumbnail generation)            |
 | Deploy   | Docker + docker-compose, persistent volume |
 
 ## Quick start (local)

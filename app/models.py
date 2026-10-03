@@ -106,6 +106,7 @@ class Attachment(Base):
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id", ondelete="CASCADE"), index=True)
     original_name: Mapped[str] = mapped_column(String(255))
     stored_name: Mapped[str] = mapped_column(String(255), unique=True)
+    thumbnail_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     content_type: Mapped[str] = mapped_column(String(150), default="application/octet-stream")
     kind: Mapped[str] = mapped_column(String(20), default="other")  # image | text | other
     size: Mapped[int] = mapped_column(Integer, default=0)

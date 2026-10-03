@@ -72,6 +72,9 @@ ADDITIVE_COLUMNS: dict[str, dict[str, str]] = {
         "spacing": "INTEGER NOT NULL DEFAULT 1",
         "meals": "VARCHAR(255) NOT NULL DEFAULT ''",
     },
+    "attachments": {
+        "thumbnail_name": "VARCHAR(255)",
+    },
 }
 
 # New shape of calendar_entries (adds ``meal`` and a per-meal unique constraint).

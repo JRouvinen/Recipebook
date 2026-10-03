@@ -260,9 +260,10 @@ a.card:hover {
 }
 
 .card-thumb {
+  display: block;
+  width: 100%;
   height: 140px;
-  background-size: cover;
-  background-position: center;
+  object-fit: cover;
   background-color: #eef1ea;
 }
 

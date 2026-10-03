@@ -90,7 +90,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Shopping list generated from planned recipes
 - [ ] Structured ingredients + unit parsing
 - [x] Import recipe from a URL (schema.org / JSON-LD)
-- [ ] Image thumbnails + optimisation
+- [x] Image thumbnails + optimisation
 - [x] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
 - [ ] Drag-and-drop ordering of recipes in a fixed plan
 - [ ] PWA / offline support

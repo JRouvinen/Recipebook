@@ -6,7 +6,7 @@
   <a class="card" href="/recipes/{{ recipe.id }}">
     {% set image = recipe.image_attachments[0] if recipe.image_attachments else None %}
     {% if image %}
-    <div class="card-thumb" style="background-image:url('/attachments/{{ image.id }}')"></div>
+    <img class="card-thumb" src="/attachments/{{ image.id }}/thumbnail" alt="" loading="lazy">
     {% else %}
     <div class="card-thumb card-thumb--empty">🍽️</div>
     {% endif %}

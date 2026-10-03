@@ -39,7 +39,7 @@
   {% for image in recipe.image_attachments %}
   <figure>
     <a href="/attachments/{{ image.id }}" target="_blank">
-      <img src="/attachments/{{ image.id }}" alt="{{ image.original_name }}" loading="lazy">
+      <img src="/attachments/{{ image.id }}/thumbnail" alt="{{ image.original_name }}" loading="lazy">
     </a>
     <figcaption>{{ image.original_name }}</figcaption>
   </figure>

@@ -9,6 +9,10 @@ and this project adheres to semantic versioning.
 ## [1.2.0] — 2026-10-03
 
 ### Added
+- **Image thumbnails:** uploaded and imported images get a downscaled JPEG thumbnail that the
+  recipe cards and galleries use, cutting page weight. Existing images are backfilled lazily
+  on first view. Adds Pillow as a dependency (optional at runtime - falls back to the original
+  image if unavailable).
 - **Multiple meals per day:** calendar plans can schedule separate recipes for breakfast,
   lunch, dinner and snack slots, each tracked (cooked / skipped / swap) independently. Plans
   without meals behave as before, and existing databases are migrated automatically (the

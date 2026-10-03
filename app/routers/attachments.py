@@ -8,7 +8,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from ..auth import CurrentUser
 from ..deps import DbSession, SettingsDep
 from ..models import Attachment, Recipe
-from ..storage import delete_upload, save_upload
+from ..storage import delete_upload, ensure_thumbnail, save_upload
 from ..templating import flash
 
 router = APIRouter()
@@ -73,6 +73,30 @@ def download_attachment(
         filename=attachment.original_name,
         content_disposition_type="attachment",
     )
+
+
+@router.get("/attachments/{attachment_id}/thumbnail")
+def serve_thumbnail(
+    session: DbSession,
+    settings: SettingsDep,
+    user: CurrentUser,
+    attachment_id: int,
+):
+    attachment = session.get(Attachment, attachment_id)
+    if attachment is None or attachment.kind != "image":
+        raise HTTPException(404, "No thumbnail for this attachment")
+
+    source = settings.media_dir / attachment.stored_name
+    if not source.exists():
+        raise HTTPException(404, "File is missing on disk")
+
+    name = ensure_thumbnail(settings.media_dir, attachment)
+    if name:
+        session.commit()
+        return FileResponse(settings.media_dir / name, media_type="image/jpeg")
+
+    # If a thumbnail could not be produced, fall back to the original image.
+    return FileResponse(source, media_type=attachment.content_type)
 
 
 @router.post("/attachments/{attachment_id}/delete")
