@@ -23,7 +23,7 @@ PUBLIC_PATHS = {
     "/manifest.webmanifest",
     "/offline",
 }
-PUBLIC_PREFIXES = ("/static/",)
+PUBLIC_PREFIXES = ("/static/", "/language/")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

@@ -19,6 +19,7 @@ from .. import __version__
 from ..archive import build_archive, discard_archive, inspect_archive
 from ..auth import CurrentUser
 from ..deps import DbSession, SettingsDep
+from ..i18n import translate
 from ..models import Attachment, Recipe, Tag
 from ..templating import flash, render
 
@@ -160,7 +161,8 @@ def import_archive(
 
     contents, error = inspect_archive(file.file)
     if error or contents is None:
-        flash(request, error or "Could not read the archive.", "error")
+        message = translate(request, error) if error else translate(request, "flash.archive_unreadable")
+        flash(request, message, "error")
         return RedirectResponse("/data", status_code=303)
 
     # Close the current session and pooled connections before swapping files.
@@ -190,8 +192,9 @@ def import_archive(
 
     flash(
         request,
-        f"Archive imported. Previous database backed up as {db_backup.name} "
-        f"and media as {media_backup.name}.",
+        translate(
+            request, "flash.archive_imported", db=db_backup.name, media=media_backup.name
+        ),
     )
     return RedirectResponse("/", status_code=303)
 
@@ -210,7 +213,7 @@ def import_db(
 
     data = file.file.read()
     if not data.startswith(SQLITE_MAGIC):
-        flash(request, "That file is not a SQLite database.", "error")
+        flash(request, translate(request, "flash.bad_sqlite"), "error")
         return RedirectResponse("/data", status_code=303)
 
     tmp_path = path.with_name(path.name + ".import.tmp")
@@ -227,12 +230,12 @@ def import_db(
             connection.close()
     except sqlite3.DatabaseError:
         tmp_path.unlink(missing_ok=True)
-        flash(request, "The uploaded file is not a valid SQLite database.", "error")
+        flash(request, translate(request, "flash.bad_sqlite_file"), "error")
         return RedirectResponse("/data", status_code=303)
 
     if not EXPECTED_TABLES.issubset(tables):
         tmp_path.unlink(missing_ok=True)
-        flash(request, "That database does not look like a Recipebook export.", "error")
+        flash(request, translate(request, "flash.not_recipebook"), "error")
         return RedirectResponse("/data", status_code=303)
 
     # Close the current session and pooled connections before swapping the file.
@@ -250,5 +253,5 @@ def import_db(
     shutil.move(str(tmp_path), str(path))
     request.app.state.db.reload()
 
-    flash(request, f"Database imported. Previous database backed up as {backup.name}.")
+    flash(request, translate(request, "flash.db_imported", name=backup.name))
     return RedirectResponse("/", status_code=303)

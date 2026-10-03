@@ -177,33 +177,30 @@ def _recipe_from_json_ld(obj: dict, base_url: str) -> ImportedRecipe:
 def fetch_html(url: str) -> tuple[str | None, str | None, str | None]:
     """Download a page.
 
-    Returns ``(html, final_url, error)``. On success ``error`` is ``None``; otherwise
-    ``html``/``final_url`` are ``None`` and ``error`` is a short, user-friendly message.
+    Returns ``(html, final_url, error_key)``. On success ``error_key`` is ``None``;
+    otherwise it is a translation key under ``import.error.*``.
     """
     if urlparse(url).scheme not in {"http", "https"}:
-        return None, None, "That does not look like a valid http(s) URL."
+        return None, None, "import.error.invalid_url"
 
     try:
         with new_client() as client:
             response = client.get(url)
     except httpx.TimeoutException:
-        return None, None, "The site took too long to respond."
+        return None, None, "import.error.timeout"
     except httpx.HTTPError:
-        return None, None, "Could not reach that site."
+        return None, None, "import.error.unreachable"
     except ValueError:
-        return None, None, "That is not a valid URL."
+        return None, None, "import.error.invalid_url"
 
     if response.status_code == 403:
-        return None, None, (
-            "The site blocked the request (403). It may be behind bot protection that "
-            "only lets real browsers through."
-        )
+        return None, None, "import.error.blocked"
     if response.status_code == 404:
-        return None, None, "That page was not found (404)."
+        return None, None, "import.error.not_found"
     if response.status_code >= 400:
-        return None, None, f"The site returned an error ({response.status_code})."
+        return None, None, "import.error.http"
     if len(response.content) > MAX_PAGE_BYTES:
-        return None, None, "That page is too large to import."
+        return None, None, "import.error.too_large"
 
     return response.text, str(response.url), None
 

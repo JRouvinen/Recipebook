@@ -23,10 +23,11 @@ def test_normalize_helpers():
 def test_find_duplicates_by_exact_and_similar_name(client, app, make_recipe):
     make_recipe("Spaghetti Bolognese")
     with app.state.db.session() as session:
-        assert "same name" in find_duplicates(session, "spaghetti bolognese")[0].reason
+        exact = find_duplicates(session, "spaghetti bolognese")
+        assert len(exact) == 1 and exact[0].same_name
         similar = find_duplicates(session, "Spagetti Bolognese")
         assert len(similar) == 1
-        assert "similar name" in similar[0].reason
+        assert similar[0].similarity is not None and similar[0].similarity >= 0.85
 
 
 def test_find_duplicates_by_source_url(client, app, make_recipe):
@@ -34,7 +35,7 @@ def test_find_duplicates_by_source_url(client, app, make_recipe):
     with app.state.db.session() as session:
         found = find_duplicates(session, "Something else", "https://example.com/alpha/")
         assert len(found) == 1
-        assert "source link" in found[0].reason
+        assert found[0].same_link
 
 
 def test_create_warns_then_saves_on_confirm(client, app, make_recipe):

@@ -101,14 +101,14 @@ def inspect_archive(fileobj) -> tuple[ArchiveContents | None, str | None]:
     try:
         archive = zipfile.ZipFile(fileobj)
     except zipfile.BadZipFile:
-        return None, "That file is not a valid zip archive."
+        return None, "flash.archive_bad_zip"
 
     with archive:
         names = archive.namelist()
         if any(not _is_safe_member(name) for name in names):
-            return None, "The archive contains an unsafe file path."
+            return None, "flash.archive_unsafe"
         if ARCHIVE_DB_NAME not in names:
-            return None, "The archive does not contain a recipebook.db."
+            return None, "flash.archive_no_db"
 
         tmpdir = Path(tempfile.mkdtemp(prefix="recipebook-import-"))
         archive.extractall(tmpdir)
@@ -116,7 +116,7 @@ def inspect_archive(fileobj) -> tuple[ArchiveContents | None, str | None]:
     db_path = tmpdir / ARCHIVE_DB_NAME
     if not _database_is_valid(db_path):
         shutil.rmtree(tmpdir, ignore_errors=True)
-        return None, "The archive's database is not a valid Recipebook database."
+        return None, "flash.archive_bad_db"
 
     manifest: dict = {}
     manifest_path = tmpdir / ARCHIVE_MANIFEST

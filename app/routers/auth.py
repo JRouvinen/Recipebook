@@ -6,6 +6,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from ..deps import SettingsDep
+from ..i18n import translate
 from ..security import verify_password
 from ..templating import flash, render
 
@@ -41,10 +42,10 @@ def login(
         password, settings.auth_password_hash
     ):
         request.session["user"] = settings.auth_username
-        flash(request, f"Welcome back, {settings.auth_username}.")
+        flash(request, translate(request, "flash.welcome", name=settings.auth_username))
         return RedirectResponse(_safe_next(next), status_code=303)
 
-    flash(request, "Invalid username or password.", "error")
+    flash(request, translate(request, "flash.invalid_login"), "error")
     return render(request, "auth/login.html", next=_safe_next(next), status_code=401)
 
 
@@ -52,5 +53,5 @@ def login(
 @router.post("/logout")
 def logout(request: Request):
     request.session.pop("user", None)
-    flash(request, "You have been logged out.", "info")
+    flash(request, translate(request, "flash.logged_out"), "info")
     return RedirectResponse("/login", status_code=303)

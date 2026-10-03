@@ -11,6 +11,7 @@ from sqlalchemy import func, select
 from ..auth import CurrentUser
 from ..calendar_service import entries_for_range, swap_entry
 from ..deps import DbSession
+from ..i18n import translate
 from ..models import CalendarEntry, MEAL_OPTIONS, Recipe, RotationItem, RotationPlan
 from ..templating import flash, render
 from ..utils import month_bounds, parse_date, week_bounds
@@ -73,7 +74,7 @@ def create_plan(
         if session.get(Recipe, recipe_id) is not None:
             session.add(RotationItem(plan_id=plan.id, recipe_id=recipe_id, position=position))
     session.commit()
-    flash(request, f'Plan "{plan.name}" created.')
+    flash(request, translate(request, "flash.plan_created", name=plan.name))
     return RedirectResponse(f"/calendar/{plan.id}", status_code=303)
 
 
@@ -106,6 +107,10 @@ def view_plan(
     for entry in entries:
         entries_by_date.setdefault(entry.entry_date, []).append(entry)
     today = date.today()
+    weekday_names = [
+        translate(request, f"weekday.{name}")
+        for name in ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+    ]
 
     days = [
         {
@@ -148,6 +153,7 @@ def view_plan(
         days=days,
         weeks=weeks,
         today=today,
+        weekday_names=weekday_names,
     )
 
 
@@ -158,7 +164,8 @@ def toggle_plan(request: Request, session: DbSession, user: CurrentUser, plan_id
         raise HTTPException(404, "Plan not found")
     plan.active = not plan.active
     session.commit()
-    flash(request, f'Plan "{plan.name}" is now {"active" if plan.active else "inactive"}.')
+    key = "flash.plan_activated" if plan.active else "flash.plan_deactivated"
+    flash(request, translate(request, key, name=plan.name))
     return RedirectResponse("/calendar", status_code=303)
 
 
@@ -170,7 +177,7 @@ def delete_plan(request: Request, session: DbSession, user: CurrentUser, plan_id
     name = plan.name
     session.delete(plan)
     session.commit()
-    flash(request, f'Plan "{name}" deleted.', "info")
+    flash(request, translate(request, "flash.plan_deleted", name=name), "info")
     return RedirectResponse("/calendar", status_code=303)
 
 
@@ -204,5 +211,5 @@ def swap_entry_route(
     if entry is None:
         raise HTTPException(404, "Entry not found")
     swap_entry(session, entry)
-    flash(request, "Swapped in a different recipe.", "info")
+    flash(request, translate(request, "flash.swapped"), "info")
     return RedirectResponse(next or f"/calendar/{entry.plan_id}", status_code=303)

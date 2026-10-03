@@ -103,7 +103,7 @@ def test_fetch_html_rejects_non_http_scheme():
 
     html, final_url, error = fetch_html("ftp://example.com/file")
     assert html is None and final_url is None
-    assert error and "valid http" in error
+    assert error == "import.error.invalid_url"
 
 
 def test_import_form_is_available(client):

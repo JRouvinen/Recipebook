@@ -11,6 +11,7 @@ from ..auth import CurrentUser
 from ..config import Settings
 from ..deps import DbSession, SettingsDep
 from ..duplicates import find_duplicates
+from ..i18n import translate
 from ..link_preview import fetch_recipe_image
 from ..models import Recipe, Tag
 from ..recipe_import import extract_recipe, fetch_html
@@ -163,9 +164,9 @@ def create_recipe(
             save_upload(session, recipe, upload, settings.media_dir)
     imported = _import_image_from_link(session, recipe, settings) if import_image else False
     session.commit()
-    flash(request, f'Recipe "{recipe.name}" created.')
+    flash(request, translate(request, "flash.recipe_created", name=recipe.name))
     if import_image and not imported:
-        flash(request, "Could not import an image from the source link.", "error")
+        flash(request, translate(request, "flash.image_import_failed"), "error")
     return RedirectResponse(f"/recipes/{recipe.id}?created=1", status_code=303)
 
 
@@ -181,12 +182,12 @@ def import_recipe_from_url(
     target = url.strip()
     html, final_url, error = fetch_html(target)
     if error:
-        flash(request, error, "error")
+        flash(request, translate(request, error), "error")
         return RedirectResponse("/recipes/new", status_code=303)
 
     data = extract_recipe(html or "", final_url or target)
     if data is None:
-        flash(request, "No recipe information was found on that page.", "error")
+        flash(request, translate(request, "flash.import_no_data"), "error")
         return RedirectResponse("/recipes/new", status_code=303)
 
     if not confirm_duplicate:
@@ -221,9 +222,9 @@ def import_recipe_from_url(
             imported_image = True
 
     session.commit()
-    flash(request, f'Imported "{recipe.name}".')
+    flash(request, translate(request, "flash.imported", name=recipe.name))
     if data.image_url and not imported_image:
-        flash(request, "Could not download the recipe image.", "error")
+        flash(request, translate(request, "flash.import_image_failed"), "error")
     return RedirectResponse(f"/recipes/{recipe.id}?created=1", status_code=303)
 
 
@@ -262,9 +263,9 @@ def update_recipe(
             save_upload(session, recipe, upload, settings.media_dir)
     imported = _import_image_from_link(session, recipe, settings) if import_image else False
     session.commit()
-    flash(request, f'Recipe "{recipe.name}" updated.')
+    flash(request, translate(request, "flash.recipe_updated", name=recipe.name))
     if import_image and not imported:
-        flash(request, "Could not import an image from the source link.", "error")
+        flash(request, translate(request, "flash.image_import_failed"), "error")
     return RedirectResponse(f"/recipes/{recipe.id}", status_code=303)
 
 
@@ -291,7 +292,7 @@ def delete_recipe(
         delete_upload(settings.media_dir, attachment)
     session.delete(recipe)
     session.commit()
-    flash(request, f'Recipe "{name}" deleted.', "info")
+    flash(request, translate(request, "flash.recipe_deleted", name=name), "info")
     return RedirectResponse("/", status_code=303)
 
 
@@ -305,10 +306,10 @@ def import_image_from_link(
 ):
     recipe = _get_recipe(session, recipe_id)
     if not recipe.source_url:
-        flash(request, "This recipe has no source link to import from.", "error")
+        flash(request, translate(request, "flash.no_source_link"), "error")
     elif _import_image_from_link(session, recipe, settings):
         session.commit()
-        flash(request, "Image imported from the source link.")
+        flash(request, translate(request, "flash.image_imported"))
     else:
-        flash(request, "Could not find an image at the source link.", "error")
+        flash(request, translate(request, "flash.image_not_found"), "error")
     return RedirectResponse(f"/recipes/{recipe_id}", status_code=303)

@@ -178,6 +178,17 @@ h2 {
   margin: 2rem auto;
 }
 
+.lang-link {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+}
+
+.lang-link.active {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .container {
   max-width: var(--max-width);
   margin: 0 auto;

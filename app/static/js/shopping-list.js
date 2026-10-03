@@ -7,6 +7,7 @@
 
   const storageKey = "recipebook-shopping:" + (list.dataset.range || "default");
   const counter = document.getElementById("shopping-count");
+  const tickedLabel = list.dataset.ticked || "ticked";
   let checked = new Set();
 
   try {
@@ -23,7 +24,7 @@
       item.classList.toggle("done", isChecked);
     });
     if (counter) {
-      counter.textContent = checked.size ? "· " + checked.size + " ticked" : "";
+      counter.textContent = checked.size ? "· " + checked.size + " " + tickedLabel : "";
     }
   }
 

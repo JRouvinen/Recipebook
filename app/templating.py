@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from functools import partial
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from .config import APP_NAME, APP_VERSION
+from .i18n import LANGUAGES, resolve_language, translate
 from .utils import human_size
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
@@ -18,6 +21,16 @@ def _context_processor(request: Request) -> dict[str, Any]:
     has_session = "session" in request.scope
     flashes: list[dict[str, str]] = request.session.pop("_flashes", []) if has_session else []
     settings = getattr(request.app.state, "settings", None)
+    language = resolve_language(request)
+
+    def meal_name(value: str) -> str:
+        if not value:
+            return ""
+        key = f"meal.{value.lower()}"
+        text = translate(request, key)
+        return value if text == key else text
+
+    next_url = request.url.path + (f"?{request.url.query}" if request.url.query else "")
     return {
         "app_name": APP_NAME,
         "app_version": APP_VERSION,
@@ -25,6 +38,11 @@ def _context_processor(request: Request) -> dict[str, Any]:
         "current_path": request.url.path,
         "auth_enabled": bool(settings and settings.auth_enabled),
         "current_user": request.session.get("user") if has_session else None,
+        "t": partial(translate, request),
+        "current_language": language,
+        "languages": LANGUAGES,
+        "meal_name": meal_name,
+        "next_url": quote(next_url, safe=""),
     }
 
 

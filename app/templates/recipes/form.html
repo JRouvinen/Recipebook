@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit recipe' if recipe else 'New recipe' }} · {{ app_name }}{% endblock %}
+{% block title %}{{ t('recipe_form.title_edit' if recipe else 'recipe_form.title_new') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
-<h1>{{ 'Edit recipe' if recipe else 'New recipe' }}</h1>
+<h1>{{ t('recipe_form.title_edit' if recipe else 'recipe_form.title_new') }}</h1>
 
 {% if not recipe %}
 {% include "recipes/_import_url.html" %}
@@ -10,60 +10,60 @@
 
 <form method="post" enctype="multipart/form-data" class="stack"
       action="{{ '/recipes/' ~ recipe.id if recipe else '/recipes' }}">
-  <label>Name
+  <label>{{ t('recipe_form.name') }}
     <input type="text" name="name" value="{{ recipe.name if recipe else '' }}" required autofocus>
   </label>
 
-  <label>Source link
+  <label>{{ t('recipe_form.source_link') }}
     <input type="url" name="source_url" value="{{ recipe.source_url if recipe else '' }}" placeholder="https://…">
   </label>
 
-  <label>Short description
+  <label>{{ t('recipe_form.description') }}
     <textarea name="description" rows="2">{{ recipe.description if recipe else '' }}</textarea>
   </label>
 
-  <label>Ingredients
+  <label>{{ t('recipe_form.ingredients') }}
     <textarea name="ingredients" rows="6" placeholder="One per line">{{ recipe.ingredients if recipe else '' }}</textarea>
   </label>
 
-  <label>Instructions
+  <label>{{ t('recipe_form.instructions') }}
     <textarea name="instructions" rows="8">{{ recipe.instructions if recipe else '' }}</textarea>
   </label>
 
-  <label>Tags
+  <label>{{ t('recipe_form.tags') }}
     <input type="text" id="tags-input" name="tags" value="{{ form_tags }}" placeholder="Vegetarian, Chicken, Quick">
-    <span class="muted">Separate with commas — or click a tag below to add it quickly.</span>
+    <span class="muted">{{ t('recipe_form.tags_hint') }}</span>
   </label>
 
   {% if all_tags %}
   <div class="tag-quickadd">
-    <span class="muted">Quick add:</span>
+    <span class="muted">{{ t('recipe_form.quick_add') }}</span>
     <div class="tag-filter" data-quick-tags>
-      {% for t in all_tags %}
-      <button type="button" class="chip" data-quick-tag="{{ t.name }}">{{ t.name }}</button>
+      {% for tag in all_tags %}
+      <button type="button" class="chip" data-quick-tag="{{ tag.name }}">{{ tag.name }}</button>
       {% endfor %}
     </div>
   </div>
   {% endif %}
 
-  <label>Add attachments
+  <label>{{ t('recipe_form.attachments') }}
     <input type="file" name="files" multiple>
-    <span class="muted">Images, text files, PDFs — multiple allowed.</span>
+    <span class="muted">{{ t('recipe_form.attachments_hint') }}</span>
   </label>
 
   <label class="check">
     <input type="checkbox" name="import_image" value="true">
-    Try to import a preview image from the source link
+    {{ t('recipe_form.import_image') }}
   </label>
 
   <div class="actions">
-    <button class="btn btn-primary" type="submit">Save recipe</button>
-    <a class="btn" href="{{ '/recipes/' ~ recipe.id if recipe else '/' }}">Cancel</a>
+    <button class="btn btn-primary" type="submit">{{ t('recipe_form.save') }}</button>
+    <a class="btn" href="{{ '/recipes/' ~ recipe.id if recipe else '/' }}">{{ t('common.cancel') }}</a>
   </div>
 </form>
 
 {% if recipe and recipe.attachments %}
-<h2>Attached files</h2>
+<h2>{{ t('recipe_form.attached_files') }}</h2>
 <ul class="attachment-list">
   {% for att in recipe.attachments %}
   <li>
@@ -71,8 +71,8 @@
     <span>
       <span class="muted">{{ att.size|human_size }}</span>
       <form class="inline" method="post" action="/attachments/{{ att.id }}/delete"
-            onsubmit="return confirm('Remove {{ att.original_name }}?')">
-        <button class="btn btn-small btn-danger" type="submit">Remove</button>
+            onsubmit="return confirm('{{ t('recipe_form.remove_confirm', name=att.original_name) }}')">
+        <button class="btn btn-small btn-danger" type="submit">{{ t('common.remove') }}</button>
       </form>
     </span>
   </li>

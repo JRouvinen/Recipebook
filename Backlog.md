@@ -85,7 +85,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ## Enhancements (v1.5.0)
 - [x] Possibility to select dark, light mode (dusk intentionally skipped)
-- [ ] Localization options (English, Finnish, German, Swedish, Norwegian) -> easy to user modify, maybe json based?
+- [x] Localization (English + Finnish), JSON-based and user-overridable (German/Swedish/Norwegian later)
 - [x] Duplicate recipe recognition -> warning when adding, if user wants it add second time the same recipe
 
 ## Future (post-v1.0)

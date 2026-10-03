@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Tags · {{ app_name }}{% endblock %}
+{% block title %}{{ t('tags.heading') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
 <div class="page-head">
-  <h1>Tags</h1>
+  <h1>{{ t('tags.heading') }}</h1>
 </div>
 
 {% if tag_rows %}
 <table class="table">
   <thead>
-    <tr><th>Tag</th><th>Recipes</th><th></th></tr>
+    <tr><th>{{ t('tags.tag') }}</th><th>{{ t('tags.recipes') }}</th><th></th></tr>
   </thead>
   <tbody>
     {% for tag, count in tag_rows %}
@@ -17,14 +17,14 @@
       <td>
         <form class="inline" method="post" action="/tags/{{ tag.id }}/rename">
           <input type="text" name="name" value="{{ tag.name }}">
-          <button class="btn btn-small" type="submit">Rename</button>
+          <button class="btn btn-small" type="submit">{{ t('common.rename') }}</button>
         </form>
       </td>
       <td><a href="/?tag={{ tag.name|urlencode }}">{{ count }}</a></td>
       <td>
         <form class="inline" method="post" action="/tags/{{ tag.id }}/delete"
-              onsubmit="return confirm('Delete tag {{ tag.name }}?')">
-          <button class="btn btn-small btn-danger" type="submit">Delete</button>
+              onsubmit="return confirm('{{ t('tags.delete_confirm', name=tag.name) }}')">
+          <button class="btn btn-small btn-danger" type="submit">{{ t('common.delete') }}</button>
         </form>
       </td>
     </tr>
@@ -32,6 +32,6 @@
   </tbody>
 </table>
 {% else %}
-<p class="empty">No tags yet — tags are created automatically when you add them to a recipe.</p>
+<p class="empty">{{ t('tags.empty') }}</p>
 {% endif %}
 {% endblock %}

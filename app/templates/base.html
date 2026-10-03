@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,15 +27,18 @@
   <header class="topbar">
     <a class="brand" href="/">🍲 {{ app_name }}</a>
     <nav>
-      <a href="/">Recipes</a>
-      <a href="/calendar">Calendar</a>
-      <a href="/shopping-list">Shopping</a>
-      <a href="/tags">Tags</a>
-      <a href="/data">Data</a>
-      <button id="theme-toggle" class="linklike" type="button" aria-label="Toggle colour theme">🌙</button>
+      <a href="/">{{ t('nav.recipes') }}</a>
+      <a href="/calendar">{{ t('nav.calendar') }}</a>
+      <a href="/shopping-list">{{ t('nav.shopping') }}</a>
+      <a href="/tags">{{ t('nav.tags') }}</a>
+      <a href="/data">{{ t('nav.data') }}</a>
+      {% for code, name in languages.items() %}
+      <a class="lang-link{% if code == current_language %} active{% endif %}" href="/language/{{ code }}?next={{ next_url }}" title="{{ name }}">{{ code|upper }}</a>
+      {% endfor %}
+      <button id="theme-toggle" class="linklike" type="button" aria-label="{{ t('theme.toggle') }}">🌙</button>
       {% if auth_enabled and current_user %}
       <form method="post" action="/logout">
-        <button class="linklike" type="submit">Log out ({{ current_user }})</button>
+        <button class="linklike" type="submit">{{ t('nav.logout', user=current_user) }}</button>
       </form>
       {% endif %}
     </nav>

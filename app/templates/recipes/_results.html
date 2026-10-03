@@ -1,4 +1,4 @@
-<p class="muted">{{ recipes|length }} recipe{{ '' if recipes|length == 1 else 's' }}</p>
+<p class="muted">{{ t('recipes.count', count=recipes|length) }}</p>
 
 {% if recipes %}
 <div class="card-grid">
@@ -14,7 +14,7 @@
       <h3>{{ recipe.name }}</h3>
       {% if recipe.tags %}
       <div class="tags">
-        {% for t in recipe.tags %}<span class="tag">{{ t.name }}</span>{% endfor %}
+        {% for tag in recipe.tags %}<span class="tag">{{ tag.name }}</span>{% endfor %}
       </div>
       {% endif %}
       {% if recipe.description %}
@@ -25,5 +25,5 @@
   {% endfor %}
 </div>
 {% else %}
-<p class="empty">No recipes found. <a href="/recipes/new">Add one</a>.</p>
+<p class="empty">{{ t('recipes.none') }} <a href="/recipes/new">{{ t('recipes.add_one') }}</a>.</p>
 {% endif %}

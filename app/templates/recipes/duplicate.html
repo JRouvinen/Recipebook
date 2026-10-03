@@ -1,17 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Possible duplicate · {{ app_name }}{% endblock %}
+{% block title %}{{ t('duplicate.title') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
-<h1>Possible duplicate recipe</h1>
-<p class="muted">
-  A similar recipe already exists. Have a look below, then go back or add this one anyway.
-</p>
+<h1>{{ t('duplicate.title') }}</h1>
+<p class="muted">{{ t('duplicate.intro') }}</p>
 
 <ul class="duplicate-list">
   {% for item in duplicates %}
   <li>
     <a href="/recipes/{{ item.recipe.id }}">{{ item.recipe.name }}</a>
-    <span class="muted">— {{ item.reason }}</span>
+    <span class="muted">— {% set parts = [] %}{% if item.same_link %}{% set _ = parts.append(t('duplicate.reason_same_link')) %}{% endif %}{% if item.same_name %}{% set _ = parts.append(t('duplicate.reason_same_name')) %}{% endif %}{% if item.similarity is not none %}{% set _ = parts.append(t('duplicate.reason_similar', percent=(item.similarity * 100)|round|int)) %}{% endif %}{{ parts|join(', ') }}</span>
   </li>
   {% endfor %}
 </ul>
@@ -23,16 +21,16 @@
   {% for field, value in values.items() %}
   <input type="hidden" name="{{ field }}" value="{{ value }}">
   {% endfor %}
-  <p class="muted">Any attachments you selected need to be added again after saving.</p>
-  <label>Attachments (optional)
+  <p class="muted">{{ t('duplicate.attachments_note') }}</p>
+  <label>{{ t('duplicate.attachments_optional') }}
     <input type="file" name="files" multiple>
   </label>
   {% endif %}
 
   <input type="hidden" name="confirm_duplicate" value="true">
   <div class="actions">
-    <button class="btn btn-danger" type="submit">Add anyway</button>
-    <a class="btn" href="/recipes/new">Cancel</a>
+    <button class="btn btn-danger" type="submit">{{ t('duplicate.add_anyway') }}</button>
+    <a class="btn" href="/recipes/new">{{ t('common.cancel') }}</a>
   </div>
 </form>
 {% endblock %}

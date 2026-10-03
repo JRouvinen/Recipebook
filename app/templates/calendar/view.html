@@ -1,30 +1,30 @@
 {% extends "base.html" %}
-{% block title %}{{ plan.name }} · Calendar · {{ app_name }}{% endblock %}
+{% block title %}{{ plan.name }} · {{ t('nav.calendar') }} · {{ app_name }}{% endblock %}
 
 {% macro entry_row(entry, next_url, compact) %}
 <div class="meal-entry">
   {% if entry.recipe %}
-    {% if entry.meal %}<div class="meal-name">{{ entry.meal }}</div>{% endif %}
+    {% if entry.meal %}<div class="meal-name">{{ meal_name(entry.meal) }}</div>{% endif %}
     <a class="day-recipe" href="/recipes/{{ entry.recipe_id }}">{{ entry.recipe.name }}</a>
     {% if compact %}
-    <span class="day-status status--{{ entry.status }}">{{ entry.status }}</span>
+    <span class="day-status status--{{ entry.status }}">{{ t('calendar_view.status_' ~ entry.status) }}</span>
     {% else %}
-    <div class="day-status status--{{ entry.status }}">{{ entry.status }}</div>
+    <div class="day-status status--{{ entry.status }}">{{ t('calendar_view.status_' ~ entry.status) }}</div>
     <div class="day-actions">
       <form method="post" action="/calendar/entries/{{ entry.id }}/status">
         <input type="hidden" name="next" value="{{ next_url }}">
-        <button class="btn btn-tiny" name="status" value="cooked" type="submit" title="Mark cooked">✓</button>
-        <button class="btn btn-tiny" name="status" value="skipped" type="submit" title="Mark skipped">✕</button>
-        <button class="btn btn-tiny" name="status" value="planned" type="submit" title="Reset to planned">↺</button>
+        <button class="btn btn-tiny" name="status" value="cooked" type="submit" title="{{ t('calendar_view.mark_cooked') }}">✓</button>
+        <button class="btn btn-tiny" name="status" value="skipped" type="submit" title="{{ t('calendar_view.mark_skipped') }}">✕</button>
+        <button class="btn btn-tiny" name="status" value="planned" type="submit" title="{{ t('calendar_view.reset_planned') }}">↺</button>
       </form>
       <form method="post" action="/calendar/entries/{{ entry.id }}/swap">
         <input type="hidden" name="next" value="{{ next_url }}">
-        <button class="btn btn-tiny" type="submit" title="Swap for another recipe">⇄</button>
+        <button class="btn btn-tiny" type="submit" title="{{ t('calendar_view.swap') }}">⇄</button>
       </form>
     </div>
     {% endif %}
   {% else %}
-    <div class="day-empty">No recipe</div>
+    <div class="day-empty">{{ t('calendar_view.no_recipe') }}</div>
   {% endif %}
 </div>
 {% endmacro %}
@@ -32,7 +32,7 @@
 {% macro day_box(entries, day_date, today, next_url, extra='', compact=False) %}
 <div class="day {% if day_date == today %}day--today{% endif %} {{ extra }}">
   <div class="day-head">
-    <span class="day-name">{{ day_date.strftime('%a') }}</span>
+    <span class="day-name">{{ weekday_names[day_date.weekday()] }}</span>
     <span class="day-num">{{ day_date.day }}</span>
   </div>
   {% if entries %}
@@ -49,25 +49,25 @@
 <div class="page-head">
   <h1>{{ plan.name }}</h1>
   <div class="actions">
-    <a class="btn" href="/calendar">All plans</a>
+    <a class="btn" href="/calendar">{{ t('calendar_view.all_plans') }}</a>
   </div>
 </div>
 <p class="muted">
-  {{ plan.mode|capitalize }} · {{ plan.interval|capitalize }} ·
-  {{ 'Active' if plan.active else 'Inactive' }} · {{ plan.items|length }} recipe(s){% if plan.spacing and plan.spacing > 1 %} · every {{ plan.spacing }} days{% endif %}{% if plan.meals %} · {{ plan.meals.replace(',', ', ') }}{% endif %}
+  {{ t('calendar.mode_' ~ plan.mode) }} · {{ t('calendar.interval_' ~ plan.interval) }} ·
+  {{ t('calendar.active') if plan.active else t('calendar.inactive') }} · {{ t('calendar.recipes_count', count=plan.items|length) }}{% if plan.spacing and plan.spacing > 1 %} · {{ t('calendar.every_n_days', n=plan.spacing) }}{% endif %}{% if plan.meals %} · {% for m in plan.meal_list %}{{ meal_name(m) }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
 </p>
 
 <div class="cal-toolbar">
   <div class="segmented">
-    <a class="{% if view == 'week' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=week&day={{ anchor.isoformat() }}">Week</a>
-    <a class="{% if view == 'month' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=month&day={{ anchor.isoformat() }}">Month</a>
+    <a class="{% if view == 'week' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=week&day={{ anchor.isoformat() }}">{{ t('calendar_view.week') }}</a>
+    <a class="{% if view == 'month' %}active{% endif %}" href="/calendar/{{ plan.id }}?view=month&day={{ anchor.isoformat() }}">{{ t('calendar_view.month') }}</a>
   </div>
   <div class="cal-nav">
-    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ prev_anchor.isoformat() }}">← Prev</a>
+    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ prev_anchor.isoformat() }}">{{ t('calendar_view.prev') }}</a>
     <span class="muted">{{ start.isoformat() }} – {{ end.isoformat() }}</span>
-    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ next_anchor.isoformat() }}">Next →</a>
+    <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ next_anchor.isoformat() }}">{{ t('calendar_view.next') }}</a>
   </div>
-  <a class="btn btn-small" href="/shopping-list?start={{ start.isoformat() }}&end={{ end.isoformat() }}">🛒 Shopping list</a>
+  <a class="btn btn-small" href="/shopping-list?start={{ start.isoformat() }}&end={{ end.isoformat() }}">🛒 {{ t('nav.shopping') }}</a>
 </div>
 
 {% if view == 'week' %}
@@ -76,7 +76,7 @@
 </div>
 {% else %}
 <div class="cal-grid">
-  {% for name in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+  {% for name in weekday_names %}
   <div class="weekday">{{ name }}</div>
   {% endfor %}
   {% for week in weeks %}

@@ -2,7 +2,8 @@
 
 A candidate is flagged when the normalised name matches exactly, when the name is
 very similar (``difflib`` ratio), or when the source link matches. The caller decides
-what to do — the app shows a warning and lets the user save anyway.
+what to do — the app shows a warning and lets the user save anyway. Reasons are returned
+as structured flags so the UI can translate them.
 """
 
 from __future__ import annotations
@@ -37,8 +38,10 @@ def normalize_url(url: str) -> str:
 @dataclass
 class Duplicate:
     recipe: Recipe
-    reason: str
     score: float
+    same_name: bool = False
+    same_link: bool = False
+    similarity: float | None = None
 
 
 def find_duplicates(
@@ -55,26 +58,35 @@ def find_duplicates(
 
     duplicates: list[Duplicate] = []
     for recipe in session.execute(select(Recipe)).scalars().all():
-        reasons: list[str] = []
-        score = 0.0
+        same_name = False
+        same_link = False
+        similarity: float | None = None
 
         if target_url and normalize_url(recipe.source_url) == target_url:
-            reasons.append("same source link")
-            score = max(score, 1.0)
+            same_link = True
 
         if target_name:
             existing_name = normalize_name(recipe.name)
             if existing_name == target_name:
-                reasons.append("same name")
-                score = max(score, 1.0)
+                same_name = True
             else:
                 ratio = difflib.SequenceMatcher(None, target_name, existing_name).ratio()
                 if ratio >= threshold:
-                    reasons.append(f"similar name ({round(ratio * 100)}%)")
-                    score = max(score, ratio)
+                    similarity = ratio
 
-        if reasons:
-            duplicates.append(Duplicate(recipe=recipe, reason=", ".join(reasons), score=score))
+        if not (same_name or same_link or similarity is not None):
+            continue
+
+        score = 1.0 if (same_name or same_link) else (similarity or 0.0)
+        duplicates.append(
+            Duplicate(
+                recipe=recipe,
+                score=score,
+                same_name=same_name,
+                same_link=same_link,
+                similarity=similarity,
+            )
+        )
 
     duplicates.sort(key=lambda item: (-item.score, item.recipe.name.lower()))
     return duplicates

@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 
 from ..auth import CurrentUser
 from ..deps import DbSession, SettingsDep
+from ..i18n import translate
 from ..models import Attachment, Recipe
 from ..storage import delete_upload, ensure_thumbnail, save_upload
 from ..templating import flash
@@ -32,9 +33,9 @@ def upload_attachments(
             saved += 1
     session.commit()
     if saved:
-        flash(request, f"Added {saved} attachment(s).")
+        flash(request, translate(request, "flash.attachments_added", count=saved))
     else:
-        flash(request, "No files were selected.", "error")
+        flash(request, translate(request, "flash.no_files"), "error")
     return RedirectResponse(f"/recipes/{recipe_id}", status_code=303)
 
 
@@ -115,5 +116,5 @@ def delete_attachment(
     delete_upload(settings.media_dir, attachment)
     session.delete(attachment)
     session.commit()
-    flash(request, f'Removed "{name}".', "info")
+    flash(request, translate(request, "flash.attachment_removed", name=name), "info")
     return RedirectResponse(f"/recipes/{recipe_id}", status_code=303)

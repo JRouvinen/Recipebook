@@ -20,6 +20,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
+- **Localization** — English and Finnish out of the box; the default comes from `RECIPEBOOK_LANGUAGE` and each browser can switch from the nav.
 - **Installable / offline** — a web app manifest + service worker let you install it as an app and keep using previously viewed pages offline.
 - **Optional login** — off by default; turn it on with a username and password (PBKDF2-hashed, no extra dependencies) to protect the whole app.
 
@@ -108,6 +109,7 @@ Configuration is via environment variables (see `.env.example`):
 | `RECIPEBOOK_AUTH_USERNAME`  | `admin`                          | Login username                       |
 | `RECIPEBOOK_AUTH_PASSWORD_HASH` | –                           | PBKDF2 hash (see below)              |
 | `RECIPEBOOK_AUTH_PASSWORD`  | –                                | Plaintext password, hashed at startup (less safe) |
+| `RECIPEBOOK_LANGUAGE`       | `en`                             | Default UI language (`en` or `fi`)   |
 
 ### Optional authentication
 
@@ -123,6 +125,18 @@ export RECIPEBOOK_AUTH_PASSWORD_HASH='pbkdf2_sha256$260000$...'
 Alternatively set `RECIPEBOOK_AUTH_PASSWORD` and it is hashed in memory at startup. With auth
 enabled, every request except the login page and static assets requires a session and is
 otherwise redirected to `/login` (returning you to the page you asked for afterwards).
+
+## Localization
+
+The UI ships in **English** and **Finnish**. The default is set with `RECIPEBOOK_LANGUAGE`
+(`en` or `fi`); visitors can switch language from the nav, which stores the choice in a
+`recipebook-lang` cookie.
+
+Translations are plain JSON in `app/i18n/<lang>.json` (English is the fallback for any missing
+key). To tweak wording without rebuilding the image, drop an override at
+`<data_dir>/i18n/<lang>.json` — it is merged over the bundled catalog on start-up (restart to
+reload). Adding a language means copying `en.json`, translating the values and registering the
+code in `app/i18n.py`.
 
 ## Install as an app (PWA)
 
@@ -201,7 +215,9 @@ app/
   middleware.py         # optional login gate
   auth.py               # current-user resolution
   deps.py / templating.py / utils.py
-  routers/              # auth, pwa, recipes, tags, attachments, calendar, shopping, data
+  i18n.py               # tiny JSON translation layer
+  i18n/                 # en.json, fi.json
+  routers/              # auth, language, pwa, recipes, tags, attachments, calendar, shopping, data
   templates/            # Jinja2 templates
   static/               # CSS + vendored HTMX + small JS helpers
 tests/                  # pytest suite

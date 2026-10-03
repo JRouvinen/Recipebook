@@ -45,6 +45,7 @@ class Settings:
     secret_key: str = field(
         default_factory=lambda: os.environ.get("RECIPEBOOK_SECRET_KEY", "dev-secret-change-me")
     )
+    language: str = field(default_factory=lambda: os.environ.get("RECIPEBOOK_LANGUAGE", "en"))
     auth_enabled: bool = field(
         default_factory=lambda: _env_bool("RECIPEBOOK_AUTH_ENABLED", False)
     )

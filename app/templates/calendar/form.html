@@ -1,55 +1,55 @@
 {% extends "base.html" %}
-{% block title %}New plan · {{ app_name }}{% endblock %}
+{% block title %}{{ t('calendar_form.title') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
-<h1>New rotation plan</h1>
+<h1>{{ t('calendar_form.title') }}</h1>
 
 <form method="post" action="/calendar" class="stack">
-  <label>Plan name
-    <input type="text" name="name" required placeholder="Weekly dinners" autofocus>
+  <label>{{ t('calendar_form.plan_name') }}
+    <input type="text" name="name" required placeholder="{{ t('calendar_form.plan_name_placeholder') }}" autofocus>
   </label>
 
   <div class="field-row">
-    <label>Mode
+    <label>{{ t('calendar_form.mode') }}
       <select name="mode">
-        <option value="fixed">Fixed order</option>
-        <option value="random">Random</option>
+        <option value="fixed">{{ t('calendar_form.fixed') }}</option>
+        <option value="random">{{ t('calendar_form.random') }}</option>
       </select>
     </label>
-    <label>Rotation
+    <label>{{ t('calendar_form.rotation') }}
       <select name="interval">
-        <option value="weekly">Weekly</option>
-        <option value="monthly">Monthly</option>
+        <option value="weekly">{{ t('calendar_form.weekly') }}</option>
+        <option value="monthly">{{ t('calendar_form.monthly') }}</option>
       </select>
     </label>
-    <label>Recipe frequency
+    <label>{{ t('calendar_form.frequency') }}
       <select name="spacing">
-        <option value="1">Every day</option>
-        <option value="2">Every other day</option>
-        <option value="3">Every 3 days</option>
-        <option value="4">Every 4 days</option>
-        <option value="7">Once a week</option>
+        <option value="1">{{ t('calendar_form.every_day') }}</option>
+        <option value="2">{{ t('calendar_form.every_other_day') }}</option>
+        <option value="3">{{ t('calendar_form.every_3_days') }}</option>
+        <option value="4">{{ t('calendar_form.every_4_days') }}</option>
+        <option value="7">{{ t('calendar_form.once_a_week') }}</option>
       </select>
     </label>
-    <label>Start date
+    <label>{{ t('calendar_form.start_date') }}
       <input type="date" name="start_date" value="{{ today.isoformat() }}">
     </label>
   </div>
 
   <fieldset>
-    <legend>Meals per day <span class="muted">(leave all unchecked for a single meal)</span></legend>
+    <legend>{{ t('calendar_form.meals') }} <span class="muted">{{ t('calendar_form.meals_hint') }}</span></legend>
     <div class="checklist">
       {% for meal in meal_options %}
       <label class="check">
         <input type="checkbox" name="meals" value="{{ meal }}">
-        {{ meal }}
+        {{ meal_name(meal) }}
       </label>
       {% endfor %}
     </div>
   </fieldset>
 
   <fieldset>
-    <legend>Recipes <span class="muted">(fixed mode uses this order top-to-bottom)</span></legend>
+    <legend>{{ t('calendar_form.recipes') }} <span class="muted">{{ t('calendar_form.recipes_hint') }}</span></legend>
     {% if recipes %}
     <div class="checklist">
       {% for recipe in recipes %}
@@ -60,13 +60,13 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty">No recipes yet. <a href="/recipes/new">Add some first</a>.</p>
+    <p class="empty">{{ t('calendar_form.no_recipes') }} <a href="/recipes/new">{{ t('calendar_form.add_first') }}</a>.</p>
     {% endif %}
   </fieldset>
 
   <div class="actions">
-    <button class="btn btn-primary" type="submit">Create plan</button>
-    <a class="btn" href="/calendar">Cancel</a>
+    <button class="btn btn-primary" type="submit">{{ t('calendar_form.create') }}</button>
+    <a class="btn" href="/calendar">{{ t('common.cancel') }}</a>
   </div>
 </form>
 {% endblock %}

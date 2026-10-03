@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Calendar · {{ app_name }}{% endblock %}
+{% block title %}{{ t('calendar.heading') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
 <div class="page-head">
-  <h1>Recipe calendar</h1>
-  <a class="btn btn-primary" href="/calendar/new">+ New plan</a>
+  <h1>{{ t('calendar.heading') }}</h1>
+  <a class="btn btn-primary" href="/calendar/new">{{ t('calendar.new') }}</a>
 </div>
 
 {% if plans %}
@@ -14,17 +14,18 @@
     <div class="card-body">
       <h3><a href="/calendar/{{ plan.id }}">{{ plan.name }}</a></h3>
       <p class="muted">
-        {{ plan.mode|capitalize }} · {{ plan.interval|capitalize }} ·
-        {{ 'Active' if plan.active else 'Inactive' }} · {{ plan.items|length }} recipe(s){% if plan.spacing and plan.spacing > 1 %} · every {{ plan.spacing }} days{% endif %}{% if plan.meals %} · {{ plan.meals.replace(',', ', ') }}{% endif %}
+        {{ t('calendar.mode_' ~ plan.mode) }} · {{ t('calendar.interval_' ~ plan.interval) }} ·
+        {{ t('calendar.active') if plan.active else t('calendar.inactive') }} ·
+        {{ t('calendar.recipes_count', count=plan.items|length) }}{% if plan.spacing and plan.spacing > 1 %} · {{ t('calendar.every_n_days', n=plan.spacing) }}{% endif %}{% if plan.meals %} · {% for m in plan.meal_list %}{{ meal_name(m) }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}
       </p>
       <div class="actions">
-        <a class="btn btn-small" href="/calendar/{{ plan.id }}">Open</a>
+        <a class="btn btn-small" href="/calendar/{{ plan.id }}">{{ t('calendar.open') }}</a>
         <form method="post" action="/calendar/{{ plan.id }}/toggle">
-          <button class="btn btn-small" type="submit">{{ 'Deactivate' if plan.active else 'Activate' }}</button>
+          <button class="btn btn-small" type="submit">{{ t('calendar.deactivate') if plan.active else t('calendar.activate') }}</button>
         </form>
         <form method="post" action="/calendar/{{ plan.id }}/delete"
-              onsubmit="return confirm('Delete plan {{ plan.name }}?')">
-          <button class="btn btn-small btn-danger" type="submit">Delete</button>
+              onsubmit="return confirm('{{ t('calendar.delete_confirm', name=plan.name) }}')">
+          <button class="btn btn-small btn-danger" type="submit">{{ t('common.delete') }}</button>
         </form>
       </div>
     </div>
@@ -32,6 +33,6 @@
   {% endfor %}
 </div>
 {% else %}
-<p class="empty">No plans yet. <a href="/calendar/new">Create your first rotation</a>.</p>
+<p class="empty">{{ t('calendar.empty') }} <a href="/calendar/new">{{ t('calendar.create_first') }}</a>.</p>
 {% endif %}
 {% endblock %}

@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 
 from ..auth import CurrentUser
 from ..deps import DbSession
+from ..i18n import translate
 from ..models import Tag, recipe_tags
 from ..templating import flash, render
 
@@ -36,11 +37,11 @@ def rename_tag(request: Request, session: DbSession, user: CurrentUser, tag_id: 
             select(Tag).where(func.lower(Tag.name) == new_name.lower(), Tag.id != tag.id)
         ).scalar_one_or_none()
         if existing is not None:
-            flash(request, f'Tag "{new_name}" already exists.', "error")
+            flash(request, translate(request, "flash.tag_exists", name=new_name), "error")
         else:
             tag.name = new_name
             session.commit()
-            flash(request, f'Tag renamed to "{new_name}".')
+            flash(request, translate(request, "flash.tag_renamed", name=new_name))
     return RedirectResponse("/tags", status_code=303)
 
 
@@ -52,5 +53,5 @@ def delete_tag(request: Request, session: DbSession, user: CurrentUser, tag_id: 
     name = tag.name
     session.delete(tag)
     session.commit()
-    flash(request, f'Tag "{name}" deleted.', "info")
+    flash(request, translate(request, "flash.tag_deleted", name=name), "info")
     return RedirectResponse("/tags", status_code=303)

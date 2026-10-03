@@ -12,6 +12,10 @@ and this project adheres to semantic versioning.
 - **Duplicate recipe warning:** adding (or importing) a recipe whose name matches or closely
   resembles an existing one, or that uses the same source link, now shows a warning listing the
   matches with an "Add anyway" option instead of saving silently.
+- **Localization (English + Finnish):** all UI text and messages come from JSON catalogs in
+  `app/i18n/`. The default language is set with `RECIPEBOOK_LANGUAGE` and each browser can
+  switch from the nav (cookie). A `<data_dir>/i18n/<lang>.json` override merges over the
+  bundled catalog, so wording can be changed without rebuilding the image.
 
 ### Documentation
 - README: added an "HTTPS (via Caddy)" section with a ready-to-use `deploy/Caddyfile` and

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Recipes · {{ app_name }}{% endblock %}
+{% block title %}{{ t('recipes.heading') }} · {{ app_name }}{% endblock %}
 
 {% block content %}
 <div class="page-head">
-  <h1>Recipes</h1>
-  <a class="btn btn-primary" href="/recipes/new">+ New recipe</a>
+  <h1>{{ t('recipes.heading') }}</h1>
+  <a class="btn btn-primary" href="/recipes/new">{{ t('recipes.new') }}</a>
 </div>
 
 {% include "recipes/_import_url.html" %}
@@ -16,21 +16,21 @@
       hx-push-url="true"
       action="/" method="get">
   <div class="filter-row">
-    <input type="search" name="q" value="{{ q }}" placeholder="Search name, ingredients, instructions…">
-    <select name="sort" aria-label="Sort">
-      <option value="name" {% if sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
-      <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest first</option>
-      <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest first</option>
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('recipes.search_placeholder') }}">
+    <select name="sort" aria-label="{{ t('recipes.sort') }}">
+      <option value="name" {% if sort == 'name' %}selected{% endif %}>{{ t('recipes.sort_name') }}</option>
+      <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{{ t('recipes.sort_newest') }}</option>
+      <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>{{ t('recipes.sort_oldest') }}</option>
     </select>
-    <noscript><button class="btn" type="submit">Search</button></noscript>
+    <noscript><button class="btn" type="submit">{{ t('common.search') }}</button></noscript>
   </div>
 
   {% if all_tags %}
   <div class="tag-filter">
-    {% for t in all_tags %}
-    <label class="chip {% if t.name in selected_tags %}chip--active{% endif %}">
-      <input type="checkbox" name="tag" value="{{ t.name }}" {% if t.name in selected_tags %}checked{% endif %}>
-      {{ t.name }}
+    {% for tag in all_tags %}
+    <label class="chip {% if tag.name in selected_tags %}chip--active{% endif %}">
+      <input type="checkbox" name="tag" value="{{ tag.name }}" {% if tag.name in selected_tags %}checked{% endif %}>
+      {{ tag.name }}
     </label>
     {% endfor %}
   </div>

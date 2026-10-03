@@ -1,5 +1,5 @@
 <form class="import-url" method="post" action="/recipes/import">
-  <input type="url" name="url" placeholder="https://example.com/recipe" required>
-  <button class="btn" type="submit">Import from URL</button>
+  <input type="url" name="url" placeholder="{{ t('import.placeholder') }}" required>
+  <button class="btn" type="submit">{{ t('import.button') }}</button>
 </form>
-<p class="muted">Paste a recipe link — Recipebook reads the page's structured data (schema.org).</p>
+<p class="muted">{{ t('import.hint') }}</p>
