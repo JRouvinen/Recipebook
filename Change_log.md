@@ -17,6 +17,9 @@ and this project adheres to semantic versioning.
 - **Optional login:** disabled by default; enable with `RECIPEBOOK_AUTH_ENABLED=true` and a
   username/password (PBKDF2-hashed, standard library only). When on, all pages except the
   login screen and static assets require a session.
+- **Shopping list:** generate a merged, de-duplicated ingredient list from the recipes
+  planned in the calendar over any date range, with per-item "used by N recipes" counts and
+  tick-off state remembered in the browser.
 
 ## [1.1.0] — 2026-10-03
 

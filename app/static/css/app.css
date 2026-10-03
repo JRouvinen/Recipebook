@@ -679,6 +679,43 @@ legend {
   padding: 1rem 0;
 }
 
+/* ---------- shopping list ---------- */
+.shopping-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.8rem 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.35rem;
+}
+
+.shopping-list li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+}
+
+.shopping-list li.done .item-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.shopping-list .badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 0.45rem;
+  font-size: 0.72rem;
+  margin-left: 0.35rem;
+}
+
+.shopping-list label.check {
+  font-weight: 400;
+  margin: 0;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
   .columns {

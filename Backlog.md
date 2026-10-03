@@ -87,7 +87,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 ## Future (post-v1.0)
 - [x] Optional user accounts / login behind the existing auth hook
 - [x] Portable archive export (DB + media as a zip) and JSON export
-- [ ] Shopping list generated from planned recipes
+- [x] Shopping list generated from planned recipes
 - [ ] Structured ingredients + unit parsing
 - [x] Import recipe from a URL (schema.org / JSON-LD)
 - [ ] Image thumbnails + optimisation

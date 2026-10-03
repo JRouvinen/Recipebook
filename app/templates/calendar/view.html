@@ -54,6 +54,7 @@
     <span class="muted">{{ start.isoformat() }} – {{ end.isoformat() }}</span>
     <a class="btn btn-small" href="/calendar/{{ plan.id }}?view={{ view }}&day={{ next_anchor.isoformat() }}">Next →</a>
   </div>
+  <a class="btn btn-small" href="/shopping-list?start={{ start.isoformat() }}&end={{ end.isoformat() }}">🛒 Shopping list</a>
 </div>
 
 {% if view == 'week' %}

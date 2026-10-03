@@ -14,6 +14,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
 - **Rotation calendar** — fixed or random, weekly or monthly; one recipe every day, every other day or weekly; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
+- **Shopping list** — generate a merged, de-duplicated ingredient list from the recipes planned over any date range.
 - **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
@@ -93,18 +94,25 @@ otherwise redirected to `/login` (returning you to the page you asked for afterw
 app/
   factory.py            # create_app() — wires settings, DB, middleware, routers
   main.py               # ASGI app object (uvicorn app.main:app)
-  config.py             # Settings from env vars
-  database.py           # engine / session factory
+  config.py             # Settings from env vars (data dir, auth, secret key)
+  database.py           # engine / session factory + additive migrations
   models.py             # Recipe, Tag, Attachment, RotationPlan, RotationItem, CalendarEntry
-  calendar_service.py   # deterministic fixed rotation + random scheduling
+  calendar_service.py   # fixed/random scheduling with configurable spacing
+  shopping.py           # merge planned recipes into a shopping list
   storage.py            # attachment files on disk
-  auth.py               # no-op auth hook (future users)
+  link_preview.py       # find + fetch a page's preview image
+  recipe_import.py      # parse schema.org JSON-LD from a recipe URL
+  archive.py            # portable .zip backup (database + media)
+  security.py           # PBKDF2 password hashing
+  middleware.py         # optional login gate
+  auth.py               # current-user resolution
   deps.py / templating.py / utils.py
-  routers/              # recipes, tags, attachments, calendar, data
+  routers/              # auth, recipes, tags, attachments, calendar, shopping, data
   templates/            # Jinja2 templates
-  static/               # CSS + vendored HTMX
+  static/               # CSS + vendored HTMX + small JS helpers
 tests/                  # pytest suite
 seed.py                 # sample data
+hash_password.py        # generate RECIPEBOOK_AUTH_PASSWORD_HASH
 Backlog.md              # project plan
 Requirements.md         # original requirements
 Change_log.md           # changelog

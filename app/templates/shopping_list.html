@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Shopping list · {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>Shopping list</h1>
+
+<form class="filters" method="get" action="/shopping-list">
+  <div class="filter-row">
+    <label>From
+      <input type="date" name="start" value="{{ start.isoformat() }}">
+    </label>
+    <label>To
+      <input type="date" name="end" value="{{ end.isoformat() }}">
+    </label>
+    <label class="check">
+      <input type="checkbox" name="exclude_cooked" value="true" {% if exclude_cooked %}checked{% endif %}>
+      Exclude cooked
+    </label>
+    <button class="btn btn-primary" type="submit">Generate</button>
+  </div>
+  <div class="actions" style="margin-top:.6rem">
+    <a class="btn btn-small" href="/shopping-list?start={{ today.isoformat() }}&end={{ (today + (end - start)).isoformat() }}">This range</a>
+    <a class="btn btn-small" href="/shopping-list?start={{ week_start.isoformat() }}&end={{ week_end.isoformat() }}">This week</a>
+    <a class="btn btn-small" href="/shopping-list?start={{ month_start.isoformat() }}&end={{ month_end.isoformat() }}">This month</a>
+  </div>
+</form>
+
+<p class="muted">
+  {{ items|length }} item{{ '' if items|length == 1 else 's' }}
+  from {{ recipes|length }} recipe{{ '' if recipes|length == 1 else 's' }}
+  ({{ start.isoformat() }} → {{ end.isoformat() }}).
+  <span id="shopping-count"></span>
+</p>
+
+{% if recipes %}
+<p class="muted">Recipes: {% for r in recipes %}<a href="/recipes/{{ r.id }}">{{ r.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+{% endif %}
+
+{% if items %}
+<div class="actions">
+  <button class="btn btn-small" type="button" id="shopping-reset">Reset ticks</button>
+</div>
+<ul class="shopping-list" id="shopping-list"
+    data-range="{{ start.isoformat() }}_{{ end.isoformat() }}{{ '_nocooked' if exclude_cooked else '' }}">
+  {% for item in items %}
+  <li data-key="{{ item.key }}">
+    <label class="check">
+      <input type="checkbox" data-shopping-item>
+      <span class="item-text">{{ item.text }}</span>
+      {% if item.count > 1 %}<span class="badge" title="Used by {{ item.count }} recipes">{{ item.count }}&times;</span>{% endif %}
+    </label>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">No recipes are planned in this range. Add a <a href="/calendar">calendar plan</a> first.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ request.url_for('static', path='js/shopping-list.js') }}" defer></script>
+{% endblock %}
