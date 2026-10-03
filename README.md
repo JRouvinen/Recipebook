@@ -58,6 +58,39 @@ docker compose up -d --build
 The database and uploaded media are stored in the `recipebook-data` volume
 (mounted at `/data` inside the container), so they survive rebuilds.
 
+## Data persistence & updating
+
+The database and all uploaded media live in the Docker volume `recipebook-data` (mounted at
+`/data`), **not** inside the container image. Updating the app therefore keeps your data:
+
+| Action | Data |
+| --- | --- |
+| `docker compose up -d --build` (rebuild after code changes) | **kept** |
+| `docker compose pull && docker compose up -d` | **kept** |
+| `docker compose restart` | **kept** |
+| `docker compose down` (container removed, volume kept) | **kept** |
+| `docker compose down -v` / `docker volume rm recipebook-data` | **deleted** |
+| `docker system prune --volumes` (when the volume is unused) | **possibly deleted** |
+
+Rebuilding only replaces the application code; the `recipebook-data` volume is re-attached to
+the new container. On startup the app applies small additive schema migrations, so an existing
+database keeps working after an update.
+
+> ⚠️ Avoid `docker compose down -v` unless you intend to wipe everything.
+
+The volume lives on the host at `/var/lib/docker/volumes/recipebook-data/_data`, but prefer
+the app's own export instead of editing it directly.
+
+### Backups before updating
+
+Use **Data → Export → Full archive (.zip)** in the app (database + media), or copy the whole
+volume:
+
+```bash
+docker run --rm -v recipebook-data:/data -v "$PWD":/backup alpine \
+  tar czf /backup/recipebook-backup.tgz -C /data .
+```
+
 ## Configuration
 
 Configuration is via environment variables (see `.env.example`):

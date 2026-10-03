@@ -29,6 +29,11 @@ and this project adheres to semantic versioning.
 - **Nested JSON-LD recipes:** the parser now searches JSON-LD recursively, so recipes nested
   inside another object (e.g. `WebPage.mainEntity`, as on `k-ruoka.fi`) are found.
 
+### Documentation
+- README: added a "Data persistence & updating" section explaining that the database and
+  media live in the `recipebook-data` volume (kept across container updates) and how to back
+  them up, including the `docker compose down -v` caveat.
+
 ## [1.1.0] — 2026-10-03
 
 ### Added
