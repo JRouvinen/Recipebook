@@ -9,6 +9,10 @@ services:
     environment:
       RECIPEBOOK_DATA_DIR: /data
       RECIPEBOOK_SECRET_KEY: "${RECIPEBOOK_SECRET_KEY:-change-me-in-production}"
+      # Optional login (off by default).
+      RECIPEBOOK_AUTH_ENABLED: "${RECIPEBOOK_AUTH_ENABLED:-false}"
+      RECIPEBOOK_AUTH_USERNAME: "${RECIPEBOOK_AUTH_USERNAME:-admin}"
+      RECIPEBOOK_AUTH_PASSWORD_HASH: "${RECIPEBOOK_AUTH_PASSWORD_HASH:-}"
     volumes:
       - recipebook-data:/data
 

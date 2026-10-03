@@ -26,6 +26,13 @@ def _env_path(name: str, default: Path) -> Path:
     return Path(value).expanduser() if value else default
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 @dataclass
 class Settings:
     app_name: str = APP_NAME
@@ -37,6 +44,18 @@ class Settings:
     database_url: str | None = None
     secret_key: str = field(
         default_factory=lambda: os.environ.get("RECIPEBOOK_SECRET_KEY", "dev-secret-change-me")
+    )
+    auth_enabled: bool = field(
+        default_factory=lambda: _env_bool("RECIPEBOOK_AUTH_ENABLED", False)
+    )
+    auth_username: str = field(
+        default_factory=lambda: os.environ.get("RECIPEBOOK_AUTH_USERNAME", "admin")
+    )
+    auth_password_hash: str | None = field(
+        default_factory=lambda: os.environ.get("RECIPEBOOK_AUTH_PASSWORD_HASH") or None
+    )
+    auth_password: str | None = field(
+        default_factory=lambda: os.environ.get("RECIPEBOOK_AUTH_PASSWORD") or None
     )
     max_upload_mb: int = 200
 
@@ -54,6 +73,12 @@ class Settings:
                 os.environ.get("RECIPEBOOK_DATABASE_URL")
                 or f"sqlite:///{self.data_dir / 'recipebook.db'}"
             )
+
+        # A plaintext password is hashed once at start-up so it never lingers in memory.
+        if self.auth_enabled and not self.auth_password_hash and self.auth_password:
+            from .security import hash_password
+
+            self.auth_password_hash = hash_password(self.auth_password)
 
     @property
     def sqlite_path(self) -> Path | None:

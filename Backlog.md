@@ -85,7 +85,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Possibility to import image of the food from recipe link
 
 ## Future (post-v1.0)
-- [ ] Optional user accounts / login behind the existing auth hook
+- [x] Optional user accounts / login behind the existing auth hook
 - [x] Portable archive export (DB + media as a zip) and JSON export
 - [ ] Shopping list generated from planned recipes
 - [ ] Structured ingredients + unit parsing

@@ -15,14 +15,16 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
 
 def _context_processor(request: Request) -> dict[str, Any]:
-    flashes: list[dict[str, str]] = []
-    if "session" in request.scope:
-        flashes = request.session.pop("_flashes", [])
+    has_session = "session" in request.scope
+    flashes: list[dict[str, str]] = request.session.pop("_flashes", []) if has_session else []
+    settings = getattr(request.app.state, "settings", None)
     return {
         "app_name": APP_NAME,
         "app_version": APP_VERSION,
         "flashes": flashes,
         "current_path": request.url.path,
+        "auth_enabled": bool(settings and settings.auth_enabled),
+        "current_user": request.session.get("user") if has_session else None,
     }
 
 

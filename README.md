@@ -18,7 +18,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.
 - **Export / import** — a portable `.zip` archive (database **and** media) for full backups, a plain `.sqlite` export, and a readable `.json` export; restore from an archive or a database file.
 - **Mobile-friendly** UI (responsive, server-rendered, HTMX for smooth filtering).
-- **No auth in v1**, but every request flows through an auth hook so it can be added later.
+- **Optional login** — off by default; turn it on with a username and password (PBKDF2-hashed, no extra dependencies) to protect the whole app.
 
 ## Stack
 
@@ -67,6 +67,25 @@ Configuration is via environment variables (see `.env.example`):
 | `RECIPEBOOK_DATABASE_URL`   | `sqlite:///<data>/recipebook.db` | Full SQLAlchemy database URL         |
 | `RECIPEBOOK_MEDIA_DIR`      | `<data>/media`                   | Where uploaded attachments are stored |
 | `RECIPEBOOK_SECRET_KEY`     | `dev-secret-change-me`           | Session signing key — change in prod |
+| `RECIPEBOOK_AUTH_ENABLED`   | `false`                          | Require login for the whole app      |
+| `RECIPEBOOK_AUTH_USERNAME`  | `admin`                          | Login username                       |
+| `RECIPEBOOK_AUTH_PASSWORD_HASH` | –                           | PBKDF2 hash (see below)              |
+| `RECIPEBOOK_AUTH_PASSWORD`  | –                                | Plaintext password, hashed at startup (less safe) |
+
+### Optional authentication
+
+Disabled by default. To protect the app, generate a password hash and enable auth:
+
+```bash
+.venv/bin/python hash_password.py            # prints pbkdf2_sha256$...
+export RECIPEBOOK_AUTH_ENABLED=true
+export RECIPEBOOK_AUTH_USERNAME=jane
+export RECIPEBOOK_AUTH_PASSWORD_HASH='pbkdf2_sha256$260000$...'
+```
+
+Alternatively set `RECIPEBOOK_AUTH_PASSWORD` and it is hashed in memory at startup. With auth
+enabled, every request except the login page and static assets requires a session and is
+otherwise redirected to `/login` (returning you to the page you asked for afterwards).
 
 ## Project layout
 

@@ -15,6 +15,11 @@
       <a href="/calendar">Calendar</a>
       <a href="/tags">Tags</a>
       <a href="/data">Data</a>
+      {% if auth_enabled and current_user %}
+      <form method="post" action="/logout">
+        <button class="linklike" type="submit">Log out ({{ current_user }})</button>
+      </form>
+      {% endif %}
     </nav>
   </header>
 

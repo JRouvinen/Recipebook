@@ -13,7 +13,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from . import models  # noqa: F401 - importing registers all models on Base.metadata
 from .config import Settings, get_settings
 from .database import Database
-from .routers import attachments, calendar, data, recipes, tags
+from .middleware import AuthMiddleware
+from .routers import attachments, auth, calendar, data, recipes, tags
 from .templating import render
 
 
@@ -31,11 +32,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.db = database
 
+    # Order matters: the last middleware added is the outermost, so SessionMiddleware
+    # wraps AuthMiddleware and populates request.session before the auth check runs.
+    if settings.auth_enabled:
+        app.add_middleware(AuthMiddleware, login_path="/login")
     app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, same_site="lax")
 
     static_dir = Path(__file__).resolve().parent / "static"
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+    app.include_router(auth.router)
     app.include_router(recipes.router)
     app.include_router(tags.router)
     app.include_router(attachments.router)

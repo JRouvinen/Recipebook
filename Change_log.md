@@ -14,6 +14,9 @@ and this project adheres to semantic versioning.
   file and a manifest — for complete backups and moving between machines. Import validates
   the archive, backs up the current database and media, then restores.
 - **JSON export:** a readable export of all recipes, their tags and attachment metadata.
+- **Optional login:** disabled by default; enable with `RECIPEBOOK_AUTH_ENABLED=true` and a
+  username/password (PBKDF2-hashed, standard library only). When on, all pages except the
+  login screen and static assets require a session.
 
 ## [1.1.0] — 2026-10-03
 

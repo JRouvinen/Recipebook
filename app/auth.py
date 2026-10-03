@@ -25,8 +25,11 @@ class User:
         return self.username
 
 
-async def get_current_user(request: Request) -> User:  # noqa: ARG001 - kept for future auth
-    """Return the acting user. Currently always the anonymous local user."""
+async def get_current_user(request: Request) -> User:
+    """Return the acting user from the session (empty when auth is disabled)."""
+    username = request.session.get("user") if "session" in request.scope else None
+    if username:
+        return User(username=username, authenticated=True)
     return User()
 
 
