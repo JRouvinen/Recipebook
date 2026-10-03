@@ -6,6 +6,10 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+### Added
+- **Light/dark theme:** a toggle in the nav switches between light and dark palettes, remembered
+  per browser. The initial theme follows the OS `prefers-color-scheme` until the user chooses.
+
 ### Documentation
 - README: added an "HTTPS (via Caddy)" section with a ready-to-use `deploy/Caddyfile` and
   `docker-compose.caddy.yml` overlay (for PWA/offline over the LAN), plus how to trust

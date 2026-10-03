@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #f6f7f4;
   --surface: #ffffff;
   --border: #e2e5dd;
@@ -11,6 +12,69 @@
   --radius: 12px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 6px 20px rgba(0, 0, 0, 0.05);
   --max-width: 1080px;
+}
+
+/* Dark theme: the whole palette flips via the same variables. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #14171a;
+  --surface: #1e2226;
+  --border: #2c3138;
+  --text: #e7e9e4;
+  --muted: #98a29c;
+  --accent: #4f9a49;
+  --accent-dark: #3f7d3a;
+  --danger: #e0836f;
+  --warning: #d8b457;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] a {
+  color: #8fd98a;
+}
+
+:root[data-theme="dark"] .btn:hover {
+  border-color: #3a4149;
+}
+
+:root[data-theme="dark"] .btn-danger {
+  border-color: #5c342c;
+}
+
+:root[data-theme="dark"] .btn-danger:hover {
+  background: #3a2420;
+}
+
+:root[data-theme="dark"] .flash.success {
+  background: #1f3320;
+  border-color: #2f5233;
+  color: #aad9a3;
+}
+
+:root[data-theme="dark"] .flash.error {
+  background: #3a2420;
+  border-color: #5c342c;
+  color: #e6a99c;
+}
+
+:root[data-theme="dark"] .flash.info {
+  background: #1f2a38;
+  border-color: #33465e;
+  color: #a8c3e0;
+}
+
+:root[data-theme="dark"] .tag {
+  background: #263223;
+  color: #b6d7ad;
+}
+
+:root[data-theme="dark"] .card-thumb {
+  background-color: #23282b;
+}
+
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 * {

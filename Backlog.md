@@ -11,8 +11,7 @@ monthly rotating calendar (one recipe per day, fixed or random rotation).
 - **Database:** SQLite via SQLAlchemy 2.0 (local file, exportable/importable)
 - **UI:** Jinja2 server-rendered templates + HTMX + hand-written responsive CSS
 - **Deploy:** Docker + docker-compose, persistent volume for the DB and media
-- **Auth:** none in v1, but all request handling goes through an auth hook so it can be
-  added later without rework.
+- **Auth:** optional single-user login (off by default), resolved through an auth hook.
 
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
@@ -83,6 +82,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] After adding a new recipe -> the page could have "Add another recipe" button
 - [x] In calendar creation, there could be way to have new recipe every other day instead of every day
 - [x] Possibility to import image of the food from recipe link
+
+## Enhancements (v1.5.0)
+- [x] Possibility to select dark, light mode (dusk intentionally skipped)
+- [ ] Localization options (English, Finnish, German, Swedish, Norwegian) -> easy to user modify, maybe json based?
+- [ ] Duplicate recipe recognition -> warning when adding, if user wants it add second time the same recipe
 
 ## Future (post-v1.0)
 - [x] Optional user accounts / login behind the existing auth hook

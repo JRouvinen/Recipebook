@@ -3,6 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    // Apply the saved / preferred colour theme before the stylesheet paints.
+    (function () {
+      try {
+        var stored = localStorage.getItem("recipebook-theme");
+        var dark = stored
+          ? stored === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      } catch (e) {}
+    })();
+  </script>
   <title>{% block title %}{{ app_name }}{% endblock %}</title>
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/app.css') }}">
   <link rel="manifest" href="/manifest.webmanifest">
@@ -20,6 +32,7 @@
       <a href="/shopping-list">Shopping</a>
       <a href="/tags">Tags</a>
       <a href="/data">Data</a>
+      <button id="theme-toggle" class="linklike" type="button" aria-label="Toggle colour theme">🌙</button>
       {% if auth_enabled and current_user %}
       <form method="post" action="/logout">
         <button class="linklike" type="submit">Log out ({{ current_user }})</button>
@@ -36,6 +49,7 @@
   </main>
 
   <footer class="footer">{{ app_name }} v{{ app_version }} · self-hosted</footer>
+  <script src="{{ request.url_for('static', path='js/theme.js') }}" defer></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
