@@ -18,7 +18,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 APP_NAME = "Recipebook"
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 
 
 def _env_path(name: str, default: Path) -> Path:
