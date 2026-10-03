@@ -9,6 +9,10 @@ and this project adheres to semantic versioning.
 ## [1.2.0] — 2026-10-03
 
 ### Added
+- **Multiple meals per day:** calendar plans can schedule separate recipes for breakfast,
+  lunch, dinner and snack slots, each tracked (cooked / skipped / swap) independently. Plans
+  without meals behave as before, and existing databases are migrated automatically (the
+  `calendar_entries` table is rebuilt to allow one entry per meal, preserving existing rows).
 - **Import recipe from a URL:** paste a recipe link and Recipebook reads the page's
   schema.org JSON-LD (name, ingredients, instructions, tags, image) and creates the recipe.
   Falls back to the page title / Open Graph metadata when no JSON-LD recipe is present.

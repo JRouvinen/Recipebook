@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from ..auth import CurrentUser
 from ..calendar_service import entries_for_range, swap_entry
 from ..deps import DbSession
-from ..models import CalendarEntry, Recipe, RotationItem, RotationPlan
+from ..models import CalendarEntry, MEAL_OPTIONS, Recipe, RotationItem, RotationPlan
 from ..templating import flash, render
 from ..utils import month_bounds, parse_date, week_bounds
 
@@ -39,7 +39,9 @@ def new_plan(request: Request, session: DbSession, user: CurrentUser):
     recipes = list(
         session.execute(select(Recipe).order_by(func.lower(Recipe.name))).scalars().all()
     )
-    return render(request, "calendar/form.html", recipes=recipes, today=date.today())
+    return render(
+        request, "calendar/form.html", recipes=recipes, today=date.today(), meal_options=MEAL_OPTIONS
+    )
 
 
 @router.post("/calendar")
@@ -52,14 +54,17 @@ def create_plan(
     interval: str = Form("weekly"),
     start_date: str = Form(""),
     spacing: int = Form(1),
+    meals: list[str] = Form(default=[]),
     recipes: list[int] = Form(default=[]),
 ):
+    selected_meals = [meal for meal in MEAL_OPTIONS if meal in meals]
     plan = RotationPlan(
         name=name.strip() or "My plan",
         mode=mode if mode in {"fixed", "random"} else "fixed",
         interval=interval if interval in {"weekly", "monthly"} else "weekly",
         start_date=parse_date(start_date),
         spacing=max(1, min(int(spacing or 1), 30)),
+        meals=",".join(selected_meals),
         active=True,
     )
     session.add(plan)
@@ -97,11 +102,16 @@ def view_plan(
         next_anchor = anchor + timedelta(days=7)
 
     entries = entries_for_range(session, plan, start, end)
-    entries_by_date = {entry.entry_date: entry for entry in entries}
+    entries_by_date: dict[date, list[CalendarEntry]] = {}
+    for entry in entries:
+        entries_by_date.setdefault(entry.entry_date, []).append(entry)
     today = date.today()
 
     days = [
-        {"date": start + timedelta(days=i), "entry": entries_by_date.get(start + timedelta(days=i))}
+        {
+            "date": start + timedelta(days=i),
+            "entries": entries_by_date.get(start + timedelta(days=i), []),
+        }
         for i in range((end - start).days + 1)
     ]
 
@@ -116,7 +126,7 @@ def view_plan(
             week.append(
                 {
                     "date": cursor,
-                    "entry": entries_by_date.get(cursor),
+                    "entries": entries_by_date.get(cursor, []),
                     "in_period": start <= cursor <= end,
                 }
             )

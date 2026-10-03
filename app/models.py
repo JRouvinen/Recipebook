@@ -36,6 +36,10 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+# Meal slots offered when building a rotation plan.
+MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner", "Snack"]
+
+
 recipe_tags = Table(
     "recipe_tags",
     Base.metadata,
@@ -120,6 +124,7 @@ class RotationPlan(Base):
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     start_date: Mapped[date] = mapped_column(Date, default=date.today)
     spacing: Mapped[int] = mapped_column(Integer, default=1)  # days between planned recipes
+    meals: Mapped[str] = mapped_column(String(255), default="")  # comma-separated meal slots
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
 
     items: Mapped[list["RotationItem"]] = relationship(
@@ -135,6 +140,11 @@ class RotationPlan(Base):
     @property
     def cycle_length(self) -> int:
         return 30 if self.interval == "monthly" else 7
+
+    @property
+    def meal_list(self) -> list[str]:
+        """Configured meal slots, or an empty list for a single unnamed meal."""
+        return [meal.strip() for meal in self.meals.split(",") if meal.strip()]
 
 
 class RotationItem(Base):
@@ -153,13 +163,16 @@ class RotationItem(Base):
 
 class CalendarEntry(Base):
     __tablename__ = "calendar_entries"
-    __table_args__ = (UniqueConstraint("plan_id", "entry_date", name="uq_entry_plan_date"),)
+    __table_args__ = (
+        UniqueConstraint("plan_id", "entry_date", "meal", name="uq_entry_plan_date_meal"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     plan_id: Mapped[int] = mapped_column(
         ForeignKey("rotation_plans.id", ondelete="CASCADE"), index=True
     )
     entry_date: Mapped[date] = mapped_column(Date, index=True)
+    meal: Mapped[str] = mapped_column(String(50), default="")  # "" = single unnamed meal
     recipe_id: Mapped[int | None] = mapped_column(
         ForeignKey("recipes.id", ondelete="SET NULL"), nullable=True
     )

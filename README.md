@@ -13,7 +13,7 @@ The whole thing is Docker-deployable and uses no external services — perfect f
 - **Multiple attachments** — images (shown inline), text files (previewed), anything else (download).
 - **Tags** — create them inline (with quick-add chips for existing tags), then filter recipes by one or more tags.
 - **Search** — across name, description, ingredients and instructions; combine with tag filters and sorting.
-- **Rotation calendar** — fixed or random, weekly or monthly; one recipe every day, every other day or weekly; wraps/repeats; mark days *cooked* / *skipped* / reset, or swap in another recipe.
+- **Rotation calendar** — fixed or random, weekly or monthly; one recipe or several meals per day (breakfast/lunch/dinner/snack); a recipe every day, every other day or weekly; wraps/repeats; mark each meal *cooked* / *skipped* / reset, or swap in another recipe.
 - **Shopping list** — generate a merged, de-duplicated ingredient list from the recipes planned over any date range.
 - **Import image from link** — fetch a preview image from a recipe's source link (or add one later from the recipe page).
 - **Import recipe from a URL** — paste a recipe link and Recipebook fills in the name, ingredients, instructions, tags and image from the page's schema.org data.

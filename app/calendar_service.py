@@ -26,7 +26,6 @@ from .models import CalendarEntry, Recipe, RotationItem, RotationPlan
 
 CYCLE_LENGTHS = {"weekly": 7, "monthly": 30}
 
-
 def cycle_length(plan: RotationPlan) -> int:
     return CYCLE_LENGTHS.get(plan.interval, 7)
 
@@ -99,7 +98,7 @@ def generate_entries(
     )
 
     existing = {
-        entry.entry_date: entry
+        (entry.entry_date, entry.meal): entry
         for entry in session.execute(
             select(CalendarEntry).where(
                 CalendarEntry.plan_id == plan.id,
@@ -120,18 +119,12 @@ def generate_entries(
     last_recipe_id = previous.recipe_id if previous else None
 
     spacing = plan_spacing(plan)
+    meals = plan.meal_list or [""]
+    meal_count = len(meals)
     pool = plan_pool(session, plan)
     created = 0
     day = start
     while day <= end:
-        entry = existing.get(day)
-        if entry is not None:
-            if entry.recipe_id is not None:
-                last_recipe_id = entry.recipe_id
-            day += timedelta(days=1)
-            continue
-
-        # The plan only covers days from its start date onwards; earlier days stay empty.
         if day < plan_start:
             day += timedelta(days=1)
             continue
@@ -141,20 +134,34 @@ def generate_entries(
             day += timedelta(days=1)
             continue
 
-        if pool:
-            if plan.mode == "random":
-                recipe_id = _pick_random(pool, last_recipe_id, rng)
-            else:
-                recipe_id = pool[recipe_slot(plan, offset) % len(pool)]
-        else:
-            recipe_id = None
+        day_slot = recipe_slot(plan, offset)
+        for meal_index, meal in enumerate(meals):
+            entry = existing.get((day, meal))
+            if entry is not None:
+                if entry.recipe_id is not None:
+                    last_recipe_id = entry.recipe_id
+                continue
 
-        entry = CalendarEntry(
-            plan_id=plan.id, entry_date=day, recipe_id=recipe_id, status="planned"
-        )
-        session.add(entry)
-        created += 1
-        last_recipe_id = recipe_id
+            if pool:
+                if plan.mode == "random":
+                    recipe_id = _pick_random(pool, last_recipe_id, rng)
+                else:
+                    recipe_id = pool[(day_slot * meal_count + meal_index) % len(pool)]
+            else:
+                recipe_id = None
+
+            session.add(
+                CalendarEntry(
+                    plan_id=plan.id,
+                    entry_date=day,
+                    meal=meal,
+                    recipe_id=recipe_id,
+                    status="planned",
+                )
+            )
+            created += 1
+            last_recipe_id = recipe_id
+
         day += timedelta(days=1)
 
     if created or deleted:

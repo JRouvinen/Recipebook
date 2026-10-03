@@ -70,8 +70,61 @@ class Database:
 ADDITIVE_COLUMNS: dict[str, dict[str, str]] = {
     "rotation_plans": {
         "spacing": "INTEGER NOT NULL DEFAULT 1",
+        "meals": "VARCHAR(255) NOT NULL DEFAULT ''",
     },
 }
+
+# New shape of calendar_entries (adds ``meal`` and a per-meal unique constraint).
+CALENDAR_ENTRIES_DDL = """
+CREATE TABLE calendar_entries (
+    id INTEGER NOT NULL,
+    plan_id INTEGER NOT NULL,
+    entry_date DATE NOT NULL,
+    meal VARCHAR(50) NOT NULL,
+    recipe_id INTEGER,
+    status VARCHAR(20) NOT NULL,
+    note TEXT NOT NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_entry_plan_date_meal UNIQUE (plan_id, entry_date, meal),
+    FOREIGN KEY(plan_id) REFERENCES rotation_plans (id) ON DELETE CASCADE,
+    FOREIGN KEY(recipe_id) REFERENCES recipes (id) ON DELETE SET NULL
+)
+"""
+
+
+def _migrate_calendar_entries_meals(engine: Engine) -> None:
+    """Rebuild ``calendar_entries`` to add ``meal`` and its unique constraint.
+
+    SQLite cannot alter table constraints, and the old table's
+    ``UNIQUE(plan_id, entry_date)`` would block multiple meals on the same day, so the
+    table is recreated (existing rows become the single unnamed meal, ``meal = ''``).
+    """
+    inspector = inspect(engine)
+    if "calendar_entries" not in inspector.get_table_names():
+        return
+    columns = {column["name"] for column in inspector.get_columns("calendar_entries")}
+    if "meal" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.exec_driver_sql("ALTER TABLE calendar_entries RENAME TO calendar_entries_old")
+        connection.exec_driver_sql(CALENDAR_ENTRIES_DDL)
+        connection.exec_driver_sql(
+            "INSERT INTO calendar_entries "
+            "(id, plan_id, entry_date, meal, recipe_id, status, note, created_at) "
+            "SELECT id, plan_id, entry_date, '', recipe_id, status, note, created_at "
+            "FROM calendar_entries_old"
+        )
+        connection.exec_driver_sql("DROP TABLE calendar_entries_old")
+        connection.exec_driver_sql(
+            "CREATE INDEX IF NOT EXISTS ix_calendar_entries_plan_id "
+            "ON calendar_entries (plan_id)"
+        )
+        connection.exec_driver_sql(
+            "CREATE INDEX IF NOT EXISTS ix_calendar_entries_entry_date "
+            "ON calendar_entries (entry_date)"
+        )
 
 
 def apply_migrations(engine: Engine) -> None:
@@ -84,4 +137,5 @@ def apply_migrations(engine: Engine) -> None:
         for name, ddl in columns.items():
             if name not in present:
                 with engine.begin() as connection:
-                    connection.exec_driver_sql(f'ALTER TABLE {table} ADD COLUMN {name} {ddl}')
+                    connection.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+    _migrate_calendar_entries_meals(engine)

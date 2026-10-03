@@ -37,6 +37,18 @@
   </div>
 
   <fieldset>
+    <legend>Meals per day <span class="muted">(leave all unchecked for a single meal)</span></legend>
+    <div class="checklist">
+      {% for meal in meal_options %}
+      <label class="check">
+        <input type="checkbox" name="meals" value="{{ meal }}">
+        {{ meal }}
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
     <legend>Recipes <span class="muted">(fixed mode uses this order top-to-bottom)</span></legend>
     {% if recipes %}
     <div class="checklist">

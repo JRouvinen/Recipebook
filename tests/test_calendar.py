@@ -189,3 +189,76 @@ def test_spacing_skips_days_before_start(client, app, make_recipe):
         "2026-01-11",
     ]
     assert [entry.recipe_id for entry in entries] == [alpha, beta, alpha]
+
+
+def test_multiple_meals_per_day(client, app, make_recipe):
+    alpha = make_recipe("Alpha")
+    beta = make_recipe("Beta")
+    plan_id = _plan(
+        client,
+        name="Three meals",
+        mode="fixed",
+        interval="weekly",
+        start_date="2026-01-05",
+        meals=["Breakfast", "Lunch", "Dinner"],
+        recipes=[alpha, beta],
+    )
+    assert client.get(f"/calendar/{plan_id}?view=week&day=2026-01-05").status_code == 200
+
+    with app.state.db.session() as session:
+        entries = (
+            session.execute(
+                select(CalendarEntry)
+                .where(CalendarEntry.plan_id == plan_id)
+                .order_by(CalendarEntry.entry_date, CalendarEntry.id)
+            )
+            .scalars()
+            .all()
+        )
+
+    assert len(entries) == 21  # 7 days x 3 meals
+    day0 = [entry for entry in entries if entry.entry_date.isoformat() == "2026-01-05"]
+    assert [entry.meal for entry in day0] == ["Breakfast", "Lunch", "Dinner"]
+    # Recipes advance continuously across meals: A B A
+    assert [entry.recipe_id for entry in day0] == [alpha, beta, alpha]
+    day1 = [entry for entry in entries if entry.entry_date.isoformat() == "2026-01-06"]
+    assert [entry.recipe_id for entry in day1] == [beta, alpha, beta]
+
+
+def test_single_meal_by_default(client, app, make_recipe):
+    recipe_id = make_recipe("Solo")
+    plan_id = _plan(
+        client, name="Single", mode="fixed", interval="weekly", start_date="2026-01-05", recipes=[recipe_id]
+    )
+    client.get(f"/calendar/{plan_id}?view=week&day=2026-01-05")
+
+    with app.state.db.session() as session:
+        entries = (
+            session.execute(select(CalendarEntry).where(CalendarEntry.plan_id == plan_id))
+            .scalars()
+            .all()
+        )
+
+    assert len(entries) == 7
+    assert all(entry.meal == "" for entry in entries)
+
+
+def test_meals_shown_in_calendar_view(client, make_recipe):
+    recipe_id = make_recipe("Omelette")
+    response = client.post(
+        "/calendar",
+        data={
+            "name": "Meals",
+            "mode": "fixed",
+            "interval": "weekly",
+            "start_date": "2026-01-05",
+            "meals": ["Breakfast", "Dinner"],
+            "recipes": [recipe_id],
+        },
+        follow_redirects=False,
+    )
+    plan_id = response.headers["location"].rstrip("/").rsplit("/", 1)[-1]
+    page = client.get(f"/calendar/{plan_id}?view=week&day=2026-01-05").text
+    assert "Breakfast" in page
+    assert "Dinner" in page
+    assert page.count("Omelette") >= 2

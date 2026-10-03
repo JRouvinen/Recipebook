@@ -91,7 +91,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [ ] Structured ingredients + unit parsing
 - [x] Import recipe from a URL (schema.org / JSON-LD)
 - [ ] Image thumbnails + optimisation
-- [ ] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
+- [x] Multiple meals/recipes per day (breakfast/lunch/dinner slots)
 - [ ] Drag-and-drop ordering of recipes in a fixed plan
 - [ ] PWA / offline support
 - [ ] "What's for dinner" notifications

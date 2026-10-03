@@ -655,6 +655,26 @@ legend {
   margin: auto;
 }
 
+.meal-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.25rem 0;
+  border-top: 1px dashed var(--border);
+}
+
+.meal-entry:first-of-type {
+  border-top: none;
+}
+
+.meal-name {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
 /* ---------- panels ---------- */
 .panel {
   background: var(--surface);
