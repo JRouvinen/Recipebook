@@ -6,6 +6,13 @@ and this project adheres to semantic versioning.
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-10-03
+
+### Fixed
+- **Docker images were missing the Data page template.** A bare `data` entry in
+  `.dockerignore` matched `app/templates/data/` at any depth, so `/data` returned 500 in
+  container deployments. The pattern is now anchored to the repository root (`/data`).
+
 ## [1.5.0] — 2026-10-03
 
 ### Added

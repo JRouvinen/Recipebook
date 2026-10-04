@@ -1,22 +1,30 @@
+# Version control / tooling
 .git
 .gitignore
 .dockerignore
-.venv
-venv
-env
+.idea
+
+# Local virtualenvs / caches
+/.venv
+/venv
+/env
 __pycache__
 *.pyc
 *.pyo
-.idea
 .pytest_cache
 .mypy_cache
 .ruff_cache
-data
+
+# Runtime data — never bake the database or uploaded media into the image.
+# NOTE: anchored to the repo root, otherwise it also excludes app/templates/data/.
+/data
 *.sqlite
 *.sqlite3
 *.db
 *.log
-tests
-Backlog.md
-Requirements.md
-Change_log.md
+
+# Tests / docs (not needed in the image)
+/tests
+/Backlog.md
+/Requirements.md
+/Change_log.md
