@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ t('data.title') }} · {{ app_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ t('data.title') }}</h1>
+
+<div class="panel">
+  <h2>{{ t('data.current') }}</h2>
+  <p class="muted">{{ db_path }}</p>
+  <ul class="stat-list">
+    <li><strong>{{ counts.recipes }}</strong> {{ t('data.recipes') }}</li>
+    <li><strong>{{ counts.tags }}</strong> {{ t('data.tags') }}</li>
+    <li><strong>{{ counts.attachments }}</strong> {{ t('data.attachments') }}</li>
+    <li><strong>{{ media_count }}</strong> {{ t('data.media_files') }}</li>
+    <li>{{ t('data.db') }}: <strong>{{ db_size|human_size }}</strong></li>
+    <li>{{ t('data.media') }}: <strong>{{ media_size|human_size }}</strong></li>
+  </ul>
+</div>
+
+<div class="panel">
+  <h2>{{ t('data.export') }}</h2>
+  <div class="actions">
+    <a class="btn btn-primary" href="/data/export/archive">{{ t('data.export_archive') }}</a>
+    <a class="btn" href="/data/export">{{ t('data.export_sqlite') }}</a>
+    <a class="btn" href="/data/export/json">{{ t('data.export_json') }}</a>
+  </div>
+  <p class="muted" style="margin-top:.6rem">{{ t('data.export_hint') }}</p>
+</div>
+
+<div class="panel">
+  <h2>{{ t('data.import') }}</h2>
+  <p class="muted">{{ t('data.import_hint') }}</p>
+  <form method="post" action="/data/import/archive" enctype="multipart/form-data" class="inline"
+        onsubmit="return confirm('{{ t('data.confirm_archive') }}')">
+    <input type="file" name="file" accept=".zip,application/zip" required>
+    <button class="btn btn-danger" type="submit">{{ t('data.import_archive') }}</button>
+  </form>
+  <form method="post" action="/data/import" enctype="multipart/form-data" class="inline"
+        style="margin-top:.6rem"
+        onsubmit="return confirm('{{ t('data.confirm_sqlite') }}')">
+    <input type="file" name="file" accept=".sqlite,.sqlite3,.db" required>
+    <button class="btn btn-danger" type="submit">{{ t('data.import_sqlite') }}</button>
+  </form>
+</div>
+{% endblock %}

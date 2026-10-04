@@ -4,9 +4,9 @@ __pycache__/
 *$py.class
 
 # Virtual environments
-.venv/
-venv/
-env/
+/.venv/
+/venv/
+/env/
 
 # Packaging
 build/
@@ -26,7 +26,8 @@ htmlcov/
 .vscode/
 
 # Runtime data (SQLite DB + uploaded media)
-data/
+# NOTE: anchored to the repo root, otherwise it also ignores app/templates/data/.
+/data/
 *.sqlite
 *.sqlite3
 *.db
@@ -34,6 +35,7 @@ data/
 # Env / secrets
 .env
 .env.*
+!.env.example
 
 # Logs
 *.log
